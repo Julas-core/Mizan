@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mizan - Your Purchase Advisor</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=Noto+Sans:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              colors: {
+                "primary": "#30e8c9",
+                "background-light": "#f6f8f8",
+                "background-dark": "#11211e",
+              },
+              fontFamily: {
+                "display": ["Plus Jakarta Sans", "sans-serif"]
+              },
+              borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+            },
+          },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-auto min-h-screen w-full flex-col bg-background-light dark:bg-background-dark overflow-x-hidden">
+<!-- Top Bar -->
+<div class="flex items-center bg-transparent p-4 pb-2 justify-between">
+<div class="w-12"></div>
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-extrabold leading-tight tracking-[-0.015em] flex-1 text-center">Mizan</h2>
+<div class="w-12 flex justify-end">
+<span class="material-symbols-outlined text-slate-900 dark:text-slate-100">info</span>
+</div>
+</div>
+<!-- Hero Image Section -->
+<div class="@container px-4 py-3">
+<div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-slate-200 dark:bg-slate-800 rounded-xl min-h-[400px] shadow-sm border border-slate-200 dark:border-slate-700" data-alt="Happy person making a conscious purchase decision." style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCLwKyvUTPZdZBoa2u2U6vTLLuOP0DRpNKcUS0oaVyLdR2AN6Sm9uN39-OIRjJy5b84zZ5LA3XHwrKXAZz10vok0YZTTAwkJQUAE3GyUT52XHjTs3zykv-UnZTJ-wvtsiDwS93Ufbbh4ffVT88sPBFQH0SYWhdlRPRpUSlUP1ThJYC96fnSlbokoe7HtEEIzxVwDLrCBZcmXiMiatE4wtQzqnEcjBn3RQNDHqw0zCEy_4pXCNpZXCw3dyd-qk91GAJjj3FmTXQEog");'>
+</div>
+</div>
+<!-- Content Section -->
+<div class="flex flex-col flex-1 px-6 pt-8 pb-12">
+<h1 class="text-slate-900 dark:text-slate-100 tracking-tight text-[36px] font-extrabold leading-tight text-center pb-4">
+            Your new purchase advisor
+        </h1>
+<p class="text-slate-600 dark:text-slate-400 text-lg font-normal leading-relaxed text-center px-2">
+            Mizan helps you make smarter financial decisions by analyzing your potential purchases. Just ask <span class="text-primary font-semibold">'Should I buy this?'</span> and we'll guide you.
+        </p>
+<!-- Pagination Indicators -->
+<div class="flex w-full flex-row items-center justify-center gap-3 py-10">
+<div class="h-2.5 w-6 rounded-full bg-primary"></div>
+<div class="h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+<div class="h-2.5 w-2.5 rounded-full bg-slate-300 dark:bg-slate-700"></div>
+</div>
+<!-- Action Button -->
+<div class="mt-auto flex flex-col gap-4">
+<button class="w-full bg-primary hover:opacity-90 text-slate-900 font-bold py-4 px-8 rounded-xl transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                Get Started
+                <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+<button class="w-full bg-transparent border-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-semibold py-4 px-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all">
+                Sign In
+            </button>
+</div>
+</div>
+<!-- Subtle Footer Graphic -->
+<div class="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-primary/10 via-primary/40 to-primary/10"></div>
+</div>
+</body></html>

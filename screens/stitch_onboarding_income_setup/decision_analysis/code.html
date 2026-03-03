@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#30e8c9",
+              "background-light": "#f6f8f8",
+              "background-dark": "#11211e",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<title>Decision Analysis</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex min-h-screen w-full flex-col bg-background-light dark:bg-background-dark max-w-md mx-auto shadow-2xl overflow-x-hidden">
+<!-- Header -->
+<header class="flex items-center bg-background-light dark:bg-background-dark p-4 justify-between border-b border-slate-200 dark:border-slate-800">
+<div class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-start cursor-pointer">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">Decision Analysis</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex cursor-pointer items-center justify-center rounded-lg h-12 bg-transparent text-slate-900 dark:text-slate-100 p-0">
+<span class="material-symbols-outlined text-2xl">share</span>
+</button>
+</div>
+</header>
+<!-- Main Content -->
+<main class="flex-1 overflow-y-auto">
+<!-- Score Section -->
+<section class="flex flex-col items-center justify-center py-10 px-4 bg-white dark:bg-slate-900/50 mb-4 rounded-b-xl shadow-sm">
+<div class="relative flex items-center justify-center">
+<svg class="size-48 transform -rotate-90">
+<circle class="text-slate-200 dark:text-slate-800" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="110.58" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-5xl font-extrabold text-slate-900 dark:text-slate-100">82</span>
+<span class="text-sm font-semibold text-slate-500 uppercase tracking-widest">Score</span>
+</div>
+</div>
+<h2 class="text-xl font-bold mt-6 text-slate-900 dark:text-slate-100">Highly Affordable</h2>
+<p class="text-slate-500 dark:text-slate-400 text-center mt-2 px-6">This purchase fits comfortably within your remaining monthly budget and savings plan.</p>
+</section>
+<!-- Impact Metrics -->
+<div class="px-4 space-y-4 pb-24">
+<!-- AI Advice -->
+<div class="bg-primary/10 border border-primary/20 p-4 rounded-xl">
+<div class="flex items-center gap-2 mb-2">
+<span class="material-symbols-outlined text-primary">smart_toy</span>
+<span class="text-sm font-bold text-primary uppercase">AI Insight</span>
+</div>
+<p class="text-slate-700 dark:text-slate-300 text-sm leading-relaxed">
+                        "You've been doing great with your savings lately! While this purchase is safe, consider that waiting just 2 more weeks would mean you could buy it using your performance bonus instead of your emergency buffer. You're in a strong position either way."
+                    </p>
+</div>
+<!-- Delay Impact -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4">
+<div class="size-12 rounded-lg bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center text-orange-600 dark:text-orange-400">
+<span class="material-symbols-outlined">hourglass_empty</span>
+</div>
+<div class="flex-1">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">Delay Impact</h3>
+<p class="text-slate-900 dark:text-slate-100 font-medium">Delays your <span class="font-bold">laptop goal</span> by 26 days</p>
+</div>
+</div>
+<!-- Opportunity Cost -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4">
+<div class="size-12 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400">
+<span class="material-symbols-outlined">movie</span>
+</div>
+<div class="flex-1">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">Opportunity Cost</h3>
+<p class="text-slate-900 dark:text-slate-100 font-medium">Equivalent to <span class="font-bold">5 movie nights</span></p>
+</div>
+</div>
+<!-- Financial Pressure -->
+<div class="bg-white dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center gap-4">
+<div class="size-12 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center text-red-600 dark:text-red-400">
+<span class="material-symbols-outlined">speed</span>
+</div>
+<div class="flex-1">
+<h3 class="text-xs font-bold text-slate-400 uppercase tracking-tight">Financial Pressure</h3>
+<p class="text-slate-900 dark:text-slate-100 font-medium">Reduces safe weekly spending by <span class="font-bold">18%</span></p>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pb-3 pt-2">
+<div class="flex gap-2">
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">target</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Goals</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">pie_chart</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Analyze</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-end gap-1 text-slate-400 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">Settings</p>
+</a>
+</div>
+</nav>
+</div>
+</body></html>

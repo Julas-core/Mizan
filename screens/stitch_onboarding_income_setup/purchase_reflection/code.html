@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Purchase Reflection - Regret Learning System</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#30e8c9",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#11211e",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Header -->
+<header class="flex items-center bg-white dark:bg-background-dark/50 p-4 sticky top-0 z-10 border-b border-primary/10">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-10">Purchase Reflection</h2>
+</header>
+<!-- Main Content -->
+<main class="flex-1 flex flex-col items-center justify-center px-6 py-8 max-w-lg mx-auto w-full">
+<!-- Transaction Card Preview -->
+<div class="w-full bg-white dark:bg-slate-800 rounded-xl p-4 mb-10 shadow-sm border border-primary/10">
+<div class="flex items-center gap-4">
+<div class="size-12 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div class="flex-1">
+<p class="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">Recent Purchase</p>
+<h4 class="text-base font-bold text-slate-900 dark:text-slate-100">Premium Coffee Maker</h4>
+<p class="text-sm text-slate-500 dark:text-slate-400">Kitchen &amp; Home • $189.00</p>
+</div>
+</div>
+</div>
+<!-- Illustration / Icon -->
+<div class="mb-8 flex justify-center">
+<div class="size-24 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined !text-6xl">psychology_alt</span>
+</div>
+</div>
+<!-- Reflection Prompt -->
+<div class="text-center space-y-4 mb-10">
+<h3 class="text-2xl font-bold leading-tight tracking-tight text-slate-900 dark:text-slate-100">
+                Was this worth the money?
+            </h3>
+<p class="text-slate-600 dark:text-slate-300 text-base leading-relaxed">
+                Reflecting on your spending helps our AI understand your unique patterns to prevent future impulse regret.
+            </p>
+</div>
+<!-- Action Options -->
+<div class="grid grid-cols-2 gap-4 w-full">
+<button class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-white dark:bg-slate-800 border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all shadow-sm">
+<span class="material-symbols-outlined !text-4xl text-slate-400">sentiment_dissatisfied</span>
+<span class="font-bold text-slate-700 dark:text-slate-200">No, I regret it</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-3 p-6 rounded-xl bg-primary/10 border-2 border-primary hover:bg-primary/20 transition-all shadow-sm">
+<span class="material-symbols-outlined !text-4xl text-primary" style="font-variation-settings: 'FILL' 1">sentiment_satisfied</span>
+<span class="font-bold text-slate-900 dark:text-slate-100">Yes, worth it</span>
+</button>
+</div>
+<!-- AI Insight Box -->
+<div class="mt-12 p-4 rounded-lg bg-slate-100 dark:bg-slate-800/50 flex gap-3 items-start border border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-primary text-xl">info</span>
+<p class="text-xs text-slate-500 dark:text-slate-400 leading-normal">
+                Your feedback is anonymous and used only to calibrate your personal budget triggers and savings goals.
+            </p>
+</div>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="sticky bottom-0 w-full border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-background-dark px-4 pb-6 pt-2">
+<div class="flex max-w-lg mx-auto justify-between items-center">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-medium">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+<p class="text-[10px] font-medium">Insights</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">psychology</span>
+<p class="text-[10px] font-medium">Reflect</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<p class="text-[10px] font-medium">Budget</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">settings</span>
+<p class="text-[10px] font-medium">Settings</p>
+</a>
+</div>
+</nav>
+</body></html>

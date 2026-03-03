@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#30e8c9",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#11211e",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<title>Onboarding - Step 5</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full flex-col max-w-md mx-auto overflow-x-hidden">
+<!-- Top Navigation -->
+<div class="flex items-center p-4 pb-2 justify-between bg-transparent">
+<div aria-label="Go back" class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center cursor-pointer">
+<span class="material-symbols-outlined text-[24px]">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">Step 5 of 5</h2>
+</div>
+<!-- Hero Illustration Area -->
+<div class="@container">
+<div class="@[480px]:px-4 @[480px]:py-3">
+<div class="w-full bg-center bg-no-repeat bg-cover flex flex-col justify-end overflow-hidden bg-primary/10 @[480px]:rounded-lg min-h-80 relative" data-alt="Abstract visualization of smart notifications and digital connectivity" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAtijrGNPLDYJldxH3yI1OsJdT35n046TNpvq9MdzFSj8hrCp0SKJT_DXLWSCYXaslPdl9MFTvmCXzqRTIZTa0XWg_pQ0YjMCYNIcy18FvllYdRbt3YlhlZYYd99C-FoJIrVtMFTEyRoKSqBvA7kcBeLEwVFw4VYT6YwludGnXfgYn2pXxnSSmp8b8Nlv4Bxp2kwjghOqlLJrYwu9gC8zTzk1N0e-YWSZtdujLdyFHmAM7bjvFt9J1Fig90bqGWix0UpgT5O1G1gg");'>
+<div class="absolute inset-0 bg-gradient-to-t from-background-light/80 dark:from-background-dark/80 to-transparent"></div>
+</div>
+</div>
+</div>
+<!-- Text Content -->
+<div class="relative z-10 px-4">
+<h1 class="text-slate-900 dark:text-slate-100 tracking-light text-[32px] font-bold leading-tight text-center pb-3 pt-6">Stay on Track</h1>
+<p class="text-slate-600 dark:text-slate-400 text-base font-normal leading-normal pb-6 pt-1 text-center">
+                Our AI will gently nudge you at the perfect moment to reflect on your decisions and capture fresh insights.
+            </p>
+<!-- Permission Card -->
+<div class="@container">
+<div class="flex flex-1 flex-col items-start justify-between gap-4 rounded-xl border border-primary/20 bg-white dark:bg-slate-800/50 p-5 @[480px]:flex-row @[480px]:items-center shadow-sm">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">notifications_active</span>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-tight">Enable Notifications</p>
+</div>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal leading-normal">Receive timely reminders and personalized reflection prompts.</p>
+</div>
+<label class="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 dark:bg-slate-700 p-0.5 transition-colors duration-200 has-[:checked]:bg-primary">
+<div class="h-6 w-6 rounded-full bg-white shadow-md transform transition-transform duration-200 translate-x-0 parent-checked:translate-x-5"></div>
+<input checked="" class="invisible absolute peer" type="checkbox"/>
+<style>
+                            input:checked + div { transform: translateX(20px); }
+                        </style>
+</label>
+</div>
+</div>
+<!-- Wrap up section -->
+<div class="mt-10 mb-10 text-center">
+<div class="inline-flex items-center justify-center size-16 rounded-full bg-primary/20 mb-4">
+<span class="material-symbols-outlined text-primary text-3xl">verified</span>
+</div>
+<h3 class="text-slate-900 dark:text-slate-100 text-2xl font-bold">You're all set!</h3>
+<p class="text-slate-500 dark:text-slate-400 mt-2">Welcome to your new way of making better choices.</p>
+</div>
+</div>
+<!-- Sticky Bottom CTA -->
+<div class="mt-auto p-4 bg-background-light dark:bg-background-dark">
+<button class="w-full bg-primary hover:opacity-90 text-slate-900 font-bold py-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2">
+                Enter Decision Hub
+                <span class="material-symbols-outlined">rocket_launch</span>
+</button>
+<p class="text-slate-400 text-xs text-center mt-4 pb-4">You can change notification settings anytime in your profile.</p>
+</div>
+</div>
+</body></html>

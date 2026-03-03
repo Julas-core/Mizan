@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Your Money Habits</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#30e8c9",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#11211e",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+<div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-background-light dark:bg-background-dark overflow-x-hidden pb-20">
+<!-- Header -->
+<div class="flex items-center bg-background-light dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-slate-200 dark:border-slate-800">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">Your Money Habits</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-full size-10 bg-transparent text-slate-900 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+</div>
+</div>
+<!-- Hero Insight Card -->
+<div class="px-4 py-6">
+<div class="relative overflow-hidden rounded-xl bg-slate-900 dark:bg-primary/10 p-6 text-white shadow-xl">
+<div class="absolute top-0 right-0 -mt-4 -mr-4 size-32 bg-primary/20 rounded-full blur-2xl"></div>
+<div class="relative z-10">
+<span class="text-primary text-xs font-bold uppercase tracking-widest">Main Behavioral Trend</span>
+<h3 class="text-2xl font-bold mt-1">Friday Night Impulses</h3>
+<p class="text-slate-300 dark:text-slate-200 mt-2 text-sm leading-relaxed">
+                        You spend <span class="text-primary font-bold">40% more</span> on non-essentials between 8 PM and midnight on Fridays compared to any other time.
+                    </p>
+<div class="mt-4 flex gap-2">
+<button class="bg-primary text-slate-900 px-4 py-2 rounded-lg text-xs font-bold hover:brightness-110 transition-all">
+                            Set a Friday Reminder
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Section Title -->
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight px-4 pt-4">Lifestyle Patterns</h2>
+<!-- Regret Alert Card -->
+<div class="p-4">
+<div class="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5 shadow-sm">
+<div class="flex items-start gap-4">
+<div class="flex size-12 items-center justify-center rounded-full bg-orange-100 dark:bg-orange-900/30 text-orange-600">
+<span class="material-symbols-outlined">shopping_bag</span>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-tight">Clothing Regret Alert</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal mt-1">
+                            Based on your return history, you tend to regret <span class="font-bold text-slate-700 dark:text-slate-200">60%</span> of clothing purchases over $100.
+                        </p>
+</div>
+</div>
+<button class="w-full bg-primary/10 dark:bg-primary/20 text-slate-900 dark:text-primary py-2.5 rounded-lg text-sm font-bold hover:bg-primary/20 dark:hover:bg-primary/30 transition-all">
+                    View Shopping Tips
+                </button>
+</div>
+</div>
+<!-- Coffee Impact Card -->
+<div class="p-4 pt-0">
+<div class="flex flex-col gap-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 p-5 shadow-sm">
+<div class="flex items-start gap-4">
+<div class="flex size-12 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600">
+<span class="material-symbols-outlined">coffee</span>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-tight">Recurring Coffee Impact</p>
+<p class="text-slate-500 dark:text-slate-400 text-sm font-normal mt-1">
+                            Your daily $5.50 espresso habit adds up to <span class="font-bold text-slate-700 dark:text-slate-200">$165/mo</span>. That's a weekend getaway every 3 months.
+                        </p>
+</div>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 py-2.5 rounded-lg text-sm font-bold">
+                        Set a limit
+                    </button>
+<button class="flex-1 bg-primary text-slate-900 py-2.5 rounded-lg text-sm font-bold">
+                        Switch to Brew
+                    </button>
+</div>
+</div>
+</div>
+<!-- Quick Insights Scroll -->
+<div class="px-4 py-4 overflow-x-auto no-scrollbar flex gap-4">
+<div class="min-w-[160px] bg-emerald-50 dark:bg-emerald-900/20 p-4 rounded-xl border border-emerald-100 dark:border-emerald-800/50">
+<span class="material-symbols-outlined text-emerald-600 mb-2">auto_awesome</span>
+<p class="text-xs font-bold text-emerald-800 dark:text-emerald-400 uppercase tracking-tighter">Superpower</p>
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200 mt-1">Never late on utilities</p>
+</div>
+<div class="min-w-[160px] bg-amber-50 dark:bg-amber-900/20 p-4 rounded-xl border border-amber-100 dark:border-amber-800/50">
+<span class="material-symbols-outlined text-amber-600 mb-2">history_edu</span>
+<p class="text-xs font-bold text-amber-800 dark:text-amber-400 uppercase tracking-tighter">Subscription</p>
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200 mt-1">3 unused services</p>
+</div>
+<div class="min-w-[160px] bg-purple-50 dark:bg-purple-900/20 p-4 rounded-xl border border-purple-100 dark:border-purple-800/50">
+<span class="material-symbols-outlined text-purple-600 mb-2">sentiment_satisfied</span>
+<p class="text-xs font-bold text-purple-800 dark:text-purple-400 uppercase tracking-tighter">Mood Spend</p>
+<p class="text-sm font-medium text-slate-800 dark:text-slate-200 mt-1">Higher when bored</p>
+</div>
+</div>
+<!-- Analysis Section -->
+<div class="p-4">
+<div class="bg-primary/5 rounded-2xl p-6 border border-primary/20">
+<div class="flex items-center justify-between mb-4">
+<h4 class="font-bold text-slate-900 dark:text-slate-100">Behavioral Score</h4>
+<span class="bg-primary text-slate-900 px-3 py-1 rounded-full text-xs font-black italic">84/100</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-800 h-3 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 84%"></div>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 mt-3 italic text-center">
+                    "You're in the top 12% of mindful spenders this month."
+                </p>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<div class="fixed bottom-0 left-0 right-0 max-w-md mx-auto flex gap-2 border-t border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md px-4 pb-4 pt-2 shadow-lg">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">home</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Home</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">pie_chart</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Analysis</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">psychology</span>
+<p class="text-[10px] font-bold leading-normal tracking-wide">Habits</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Budgets</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">person</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">Profile</p>
+</a>
+</div>
+</div>
+</body></html>

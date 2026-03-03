@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Spending Habits | Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#30e8c9",
+                        "background-light": "#f6f8f8",
+                        "background-dark": "#11211e",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Progress Header -->
+<header class="w-full px-6 py-8 max-w-2xl mx-auto">
+<div class="flex items-center justify-between mb-8">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+<span class="material-icons">arrow_back</span>
+</button>
+<div class="flex gap-2">
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-8 rounded-full bg-slate-200 dark:bg-slate-800"></div>
+</div>
+<div class="w-10"></div> <!-- Spacer for symmetry -->
+</div>
+<div class="text-center">
+<h1 class="text-3xl font-bold tracking-tight mb-2">Spending Habits</h1>
+<p class="text-slate-600 dark:text-slate-400">Tell us about your fixed costs to calculate your <span class="text-primary font-semibold">Safe-to-Spend</span> amount.</p>
+</div>
+</header>
+<main class="flex-grow w-full max-w-xl mx-auto px-6 pb-12">
+<div class="space-y-8">
+<!-- Visual Summary Card -->
+<div class="bg-primary/10 dark:bg-primary/5 border border-primary/20 rounded-xl p-6 flex items-center gap-4">
+<div class="w-14 h-14 bg-primary rounded-full flex items-center justify-center text-slate-900">
+<span class="material-icons text-3xl">account_balance_wallet</span>
+</div>
+<div>
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Estimated Balance</p>
+<p class="text-2xl font-bold text-slate-900 dark:text-slate-100">$2,450.00 <span class="text-sm font-normal text-slate-500">remaining</span></p>
+</div>
+</div>
+<!-- Inputs Section -->
+<div class="space-y-6">
+<!-- Rent/Mortgage -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Monthly Rent or Mortgage</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+<input class="w-full pl-8 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="1,200" type="number"/>
+</div>
+</div>
+<!-- Utilities/Bills -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Utilities &amp; Subscriptions</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+<input class="w-full pl-8 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="250" type="number"/>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 italic">Think: Electricity, Internet, Netflix, Gym.</p>
+</div>
+<!-- Other Fixed Expenses -->
+<div class="space-y-2">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300">Other Fixed Expenses</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-medium">$</span>
+<input class="w-full pl-8 pr-4 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all" placeholder="400" type="number"/>
+</div>
+<p class="text-xs text-slate-500 dark:text-slate-400 italic">Think: Groceries, Insurances, Commuting.</p>
+</div>
+</div>
+<!-- Helpful Tip -->
+<div class="p-4 bg-slate-100 dark:bg-slate-800/50 rounded-xl flex gap-3 items-start">
+<span class="material-icons text-primary text-xl">lightbulb</span>
+<p class="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
+                    Most people underestimate their monthly spending by about 20%. Round up your numbers for a safer budget.
+                </p>
+</div>
+</div>
+</main>
+<!-- Footer Action -->
+<footer class="w-full max-w-xl mx-auto p-6 mt-auto">
+<div class="flex flex-col gap-4">
+<button class="w-full py-4 bg-primary text-slate-900 font-bold rounded-xl shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+                Calculate Safe-to-Spend
+            </button>
+<button class="w-full py-2 text-slate-500 dark:text-slate-400 text-sm font-medium hover:text-primary transition-colors">
+                I'll do this later
+            </button>
+</div>
+</footer>
+<!-- Abstract Background Elements -->
+<div class="fixed top-0 right-0 -z-10 w-64 h-64 bg-primary/5 rounded-full blur-3xl"></div>
+<div class="fixed bottom-0 left-0 -z-10 w-96 h-96 bg-primary/10 rounded-full blur-3xl"></div>
+</body></html>
