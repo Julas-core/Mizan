@@ -42,7 +42,11 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
 
     setState(() => _isLoading = true);
     try {
-      final result = await ApiService.evaluatePurchase(item, priceCents, 'General');
+      final result = await ApiService.evaluatePurchase(
+        item,
+        priceCents,
+        'General',
+      );
       if (!mounted) return;
       Navigator.push(
         context,
@@ -52,9 +56,9 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Evaluation error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Evaluation error: $e')));
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -103,7 +107,9 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
                   const SizedBox(height: 12),
                   TextField(
                     controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     style: const TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: 'Price (USD)',
@@ -142,10 +148,17 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(top: 12, bottom: 24, left: 24, right: 24),
+        padding: const EdgeInsets.only(
+          top: 12,
+          bottom: 24,
+          left: 24,
+          right: 24,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF0f172a),
-          border: Border(top: BorderSide(color: primaryColor.withValues(alpha: 0.1))),
+          border: Border(
+            top: BorderSide(color: primaryColor.withValues(alpha: 0.1)),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -166,7 +179,9 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
             _buildNavItem(Icons.insights, 'Insights', false, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const PurchaseReflectionScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const PurchaseReflectionScreen(),
+                ),
               );
             }),
             _buildNavItem(Icons.track_changes, 'Goals', false, () {

@@ -1,11 +1,46 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 import 'decision_input_screen.dart';
 import 'goals_hub_screen.dart';
 import 'home_screen.dart';
 import 'purchase_reflection_screen.dart';
 
-class HabitsScreen extends StatelessWidget {
+class HabitsScreen extends StatefulWidget {
   const HabitsScreen({super.key});
+
+  @override
+  State<HabitsScreen> createState() => _HabitsScreenState();
+}
+
+class _HabitsScreenState extends State<HabitsScreen> {
+  bool _isLoading = true;
+  String? _error;
+  Map<String, dynamic>? _insights;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInsights();
+  }
+
+  Future<void> _loadInsights() async {
+    try {
+      final insights = await ApiService.getHabitsInsights();
+      if (!mounted) return;
+      setState(() {
+        _insights = insights;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
+
+  String _usdFromCents(num cents) => '\$${(cents / 100).toStringAsFixed(2)}';
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +55,10 @@ class HabitsScreen extends StatelessWidget {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -43,10 +81,13 @@ class HabitsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16.0,
+                  vertical: 8.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -55,24 +96,59 @@ class HabitsScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: primaryColor.withOpacity(0.2)),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text('MAIN BEHAVIORAL TREND', style: TextStyle(color: primaryColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.5)),
+                          const Text(
+                            'MAIN BEHAVIORAL TREND',
+                            style: TextStyle(
+                              color: primaryColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 1.5,
+                            ),
+                          ),
                           const SizedBox(height: 8),
-                          const Text('Friday Night Impulses', style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)),
+                          Text(
+                            _isLoading
+                                ? 'Loading habits...'
+                                : (_error != null
+                                      ? 'Unable to load habits'
+                                      : '${_insights?['main_behavior_trend'] ?? 'No trend yet'}'),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           const SizedBox(height: 12),
-                          const Text.rich(
+                          Text.rich(
                             TextSpan(
                               text: 'You spend ',
-                              style: TextStyle(color: Colors.white70, fontSize: 14, height: 1.5),
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontSize: 14,
+                                height: 1.5,
+                              ),
                               children: [
-                                TextSpan(text: '40% more', style: TextStyle(color: primaryColor, fontWeight: FontWeight.bold)),
-                                TextSpan(text: ' on non-essentials between 8 PM and midnight on Fridays compared to any other time.'),
+                                TextSpan(
+                                  text:
+                                      '${_insights?['friday_overspend_percent'] ?? 0}% more',
+                                  style: const TextStyle(
+                                    color: primaryColor,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text:
+                                      ' during ${_insights?['impulse_window'] ?? 'your usual impulse window'}.',
+                                ),
                               ],
                             ),
                           ),
@@ -86,21 +162,34 @@ class HabitsScreen extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                             ),
-                            child: const Text('Set a Friday Reminder', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                          )
+                            child: const Text(
+                              'Set a Friday Reminder',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    const Text('Lifestyle Patterns', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                    const Text(
+                      'Lifestyle Patterns',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                     const SizedBox(height: 16),
-                    
+
                     // Regret Alert Card
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: surfaceDark.withOpacity(0.5),
+                        color: surfaceDark.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: surfaceDark),
                       ),
@@ -113,32 +202,57 @@ class HabitsScreen extends StatelessWidget {
                                 height: 48,
                                 width: 48,
                                 decoration: BoxDecoration(
-                                  color: Colors.orange.withOpacity(0.2),
+                                  color: Colors.orange.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.shopping_bag, color: Colors.orangeAccent),
+                                child: const Icon(
+                                  Icons.shopping_bag,
+                                  color: Colors.orangeAccent,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               const Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Clothing Regret Alert', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                                    Text(
+                                      'Clothing Regret Alert',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                     SizedBox(height: 4),
-                                    Text.rich(
-                                      TextSpan(
-                                        text: 'Based on your return history, you tend to regret ',
-                                        style: TextStyle(color: Colors.white54, fontSize: 14),
-                                        children: [
-                                          TextSpan(text: '60%', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
-                                          TextSpan(text: ' of clothing purchases over \$100.'),
-                                        ]
-                                      )
-                                    )
                                   ],
                                 ),
-                              )
+                              ),
                             ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text.rich(
+                            TextSpan(
+                              text:
+                                  'Based on your reflection history, you reported regret on ',
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 14,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text:
+                                      '${_insights?['high_regret_rate_percent'] ?? 0}%',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text:
+                                      ' of reflected purchases, with ${_insights?['top_regret_category'] ?? 'General'} as your most sensitive category.',
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
                           SizedBox(
@@ -146,24 +260,31 @@ class HabitsScreen extends StatelessWidget {
                             child: TextButton(
                               onPressed: () {},
                               style: TextButton.styleFrom(
-                                backgroundColor: primaryColor.withOpacity(0.1),
+                                backgroundColor: primaryColor.withValues(
+                                  alpha: 0.1,
+                                ),
                                 foregroundColor: primaryColor,
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
                               ),
-                              child: const Text('View Shopping Tips', style: TextStyle(fontWeight: FontWeight.bold)),
+                              child: const Text(
+                                'View Shopping Tips',
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              ),
                             ),
-                          )
+                          ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 16),
-                    
+
                     // Coffee Impact Card
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: surfaceDark.withOpacity(0.5),
+                        color: surfaceDark.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(12),
                         border: Border.all(color: surfaceDark),
                       ),
@@ -177,32 +298,55 @@ class HabitsScreen extends StatelessWidget {
                                 height: 48,
                                 width: 48,
                                 decoration: BoxDecoration(
-                                  color: Colors.blue.withOpacity(0.2),
+                                  color: Colors.blue.withValues(alpha: 0.2),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(Icons.coffee, color: Colors.lightBlue),
+                                child: const Icon(
+                                  Icons.coffee,
+                                  color: Colors.lightBlue,
+                                ),
                               ),
                               const SizedBox(width: 16),
                               const Expanded(
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text('Recurring Coffee Impact', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                                    SizedBox(height: 4),
-                                    Text.rich(
-                                      TextSpan(
-                                        text: 'Your daily \$5.50 espresso habit adds up to ',
-                                        style: TextStyle(color: Colors.white54, fontSize: 14),
-                                        children: [
-                                          TextSpan(text: '\$165/mo', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white70)),
-                                          TextSpan(text: '. That\'s a weekend getaway every 3 months.'),
-                                        ]
-                                      )
-                                    )
+                                    Text(
+                                      'Recurring Coffee Impact',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
                                   ],
                                 ),
-                              )
+                              ),
                             ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text.rich(
+                            TextSpan(
+                              text: 'You completed ',
+                              style: const TextStyle(
+                                color: Colors.white54,
+                                fontSize: 14,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text:
+                                      '${_insights?['bought_purchases_count'] ?? 0} purchases',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white70,
+                                  ),
+                                ),
+                                TextSpan(
+                                  text:
+                                      ' totaling ${_usdFromCents((_insights?['total_bought_spend_last_30d_cents'] as num?) ?? 0)} in the last 30 days.',
+                                ),
+                              ],
+                            ),
                           ),
                           const SizedBox(height: 16),
                           Row(
@@ -213,9 +357,16 @@ class HabitsScreen extends StatelessWidget {
                                   style: TextButton.styleFrom(
                                     backgroundColor: surfaceDark,
                                     foregroundColor: Colors.white70,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                   ),
-                                  child: const Text('Set a limit', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  child: const Text(
+                                    'Set a limit',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 8),
@@ -225,20 +376,27 @@ class HabitsScreen extends StatelessWidget {
                                   style: ElevatedButton.styleFrom(
                                     backgroundColor: primaryColor,
                                     foregroundColor: bgDark,
-                                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
                                     elevation: 0,
                                   ),
-                                  child: const Text('Switch to Brew', style: TextStyle(fontWeight: FontWeight.bold)),
+                                  child: const Text(
+                                    'Switch to Brew',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
                                 ),
                               ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Quick Insights Scroll (Horizontal)
                     SizedBox(
                       height: 120,
@@ -246,23 +404,43 @@ class HabitsScreen extends StatelessWidget {
                         scrollDirection: Axis.horizontal,
                         clipBehavior: Clip.none,
                         children: [
-                          _buildInsightPill(Icons.auto_awesome, Colors.teal, Colors.teal.withOpacity(0.2), 'SUPERPOWER', 'Never late on utilities'),
+                          _buildInsightPill(
+                            Icons.auto_awesome,
+                            Colors.teal,
+                            Colors.teal.withValues(alpha: 0.2),
+                            'SUPERPOWER',
+                            'Never late on utilities',
+                          ),
                           const SizedBox(width: 16),
-                          _buildInsightPill(Icons.history_edu, Colors.amber, Colors.amber.withOpacity(0.2), 'SUBSCRIPTION', '3 unused services'),
+                          _buildInsightPill(
+                            Icons.history_edu,
+                            Colors.amber,
+                            Colors.amber.withValues(alpha: 0.2),
+                            'SUBSCRIPTION',
+                            '3 unused services',
+                          ),
                           const SizedBox(width: 16),
-                          _buildInsightPill(Icons.sentiment_satisfied, Colors.purpleAccent, Colors.purpleAccent.withOpacity(0.2), 'MOOD SPEND', 'Higher when bored'),
+                          _buildInsightPill(
+                            Icons.sentiment_satisfied,
+                            Colors.purpleAccent,
+                            Colors.purpleAccent.withValues(alpha: 0.2),
+                            'MOOD SPEND',
+                            'Higher when bored',
+                          ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     // Analysis Section
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.05),
-                        border: Border.all(color: primaryColor.withOpacity(0.2)),
+                        color: primaryColor.withValues(alpha: 0.05),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.2),
+                        ),
                         borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
@@ -270,35 +448,62 @@ class HabitsScreen extends StatelessWidget {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text('Behavioral Score', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
+                              const Text(
+                                'Behavioral Score',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                               Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 4,
+                                ),
                                 decoration: BoxDecoration(
                                   color: primaryColor,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Text('84/100', style: TextStyle(color: bgDark, fontSize: 12, fontWeight: FontWeight.w900, fontStyle: FontStyle.italic)),
-                              )
+                                child: Text(
+                                  '${_insights?['behavioral_score'] ?? 0}/100',
+                                  style: const TextStyle(
+                                    color: bgDark,
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w900,
+                                    fontStyle: FontStyle.italic,
+                                  ),
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 16),
                           LinearProgressIndicator(
-                            value: 0.84,
+                            value:
+                                ((_insights?['behavioral_score'] ?? 0) as num)
+                                    .toDouble() /
+                                100,
                             backgroundColor: surfaceDark,
                             color: primaryColor,
                             minHeight: 12,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           const SizedBox(height: 16),
-                          const Text(
-                            '"You\'re in the top 12% of mindful spenders this month."',
+                          Text(
+                            _error != null
+                                ? '"Unable to fetch behavior ranking right now."'
+                                : '"Your habits score is computed from real purchases and reflections."',
                             textAlign: TextAlign.center,
-                            style: TextStyle(color: Colors.white54, fontSize: 12, fontStyle: FontStyle.italic),
-                          )
+                            style: const TextStyle(
+                              color: Colors.white54,
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
                         ],
                       ),
                     ),
-                    
+
                     const SizedBox(height: 48), // Bottom padding
                   ],
                 ),
@@ -308,10 +513,17 @@ class HabitsScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(top: 12, bottom: 24, left: 24, right: 24),
+        padding: const EdgeInsets.only(
+          top: 12,
+          bottom: 24,
+          left: 24,
+          right: 24,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF0f172a),
-          border: Border(top: BorderSide(color: primaryColor.withValues(alpha: 0.1))),
+          border: Border(
+            top: BorderSide(color: primaryColor.withValues(alpha: 0.1)),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -332,7 +544,9 @@ class HabitsScreen extends StatelessWidget {
             _buildNavItem(Icons.insights, 'Insights', false, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const PurchaseReflectionScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const PurchaseReflectionScreen(),
+                ),
               );
             }),
             _buildNavItem(Icons.track_changes, 'Goals', false, () {
@@ -347,23 +561,44 @@ class HabitsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInsightPill(IconData icon, Color iconColor, Color bgColor, String title, String subtitle) {
+  Widget _buildInsightPill(
+    IconData icon,
+    Color iconColor,
+    Color bgColor,
+    String title,
+    String subtitle,
+  ) {
     return Container(
       width: 160,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: iconColor.withOpacity(0.5)),
+        border: Border.all(color: iconColor.withValues(alpha: 0.5)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Icon(icon, color: iconColor),
           const Spacer(),
-          Text(title, style: TextStyle(color: iconColor, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1)),
+          Text(
+            title,
+            style: TextStyle(
+              color: iconColor,
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
         ],
       ),
     );
@@ -380,7 +615,11 @@ class HabitsScreen extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isActive ? const Color(0xFF30e8c9) : Colors.white54, size: 24),
+          Icon(
+            icon,
+            color: isActive ? const Color(0xFF30e8c9) : Colors.white54,
+            size: 24,
+          ),
           const SizedBox(height: 4),
           Text(
             label,

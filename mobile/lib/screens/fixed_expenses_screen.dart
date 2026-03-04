@@ -128,7 +128,7 @@ class _FixedExpensesScreenState extends State<FixedExpensesScreen> {
                           : Colors.transparent,
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: const Color(0xFF30e8c9).withOpacity(0.3),
+                        color: const Color(0xFF30e8c9).withValues(alpha: 0.3),
                       ),
                     ),
                     alignment: Alignment.center,
@@ -195,8 +195,10 @@ class _FixedExpensesScreenState extends State<FixedExpensesScreen> {
                   vertical: 4,
                 ),
                 decoration: BoxDecoration(
-                  color: primaryColor.withOpacity(0.1),
-                  border: Border.all(color: primaryColor.withOpacity(0.3)),
+                  color: primaryColor.withValues(alpha: 0.1),
+                  border: Border.all(
+                    color: primaryColor.withValues(alpha: 0.3),
+                  ),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
@@ -379,9 +381,9 @@ class _FixedExpensesScreenState extends State<FixedExpensesScreen> {
                     Container(
                       padding: const EdgeInsets.all(24),
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.05),
+                        color: primaryColor.withValues(alpha: 0.05),
                         border: Border.all(
-                          color: primaryColor.withOpacity(0.2),
+                          color: primaryColor.withValues(alpha: 0.2),
                         ),
                         borderRadius: BorderRadius.circular(16),
                       ),
@@ -457,8 +459,9 @@ class _FixedExpensesScreenState extends State<FixedExpensesScreen> {
                           context,
                           _utilitiesDueDate,
                         );
-                        if (val != null)
+                        if (val != null) {
                           setState(() => _utilitiesDueDate = val);
+                        }
                       },
                     ),
                     const SizedBox(height: 24),

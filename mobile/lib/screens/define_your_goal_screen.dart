@@ -199,7 +199,7 @@ class _DefineYourGoalScreenState extends State<DefineYourGoalScreen> {
                 gradient: LinearGradient(
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
-                  colors: [bgDark, bgDark.withOpacity(0.0)],
+                  colors: [bgDark, bgDark.withValues(alpha: 0.0)],
                 ),
               ),
               child: Column(
@@ -268,7 +268,7 @@ class _DefineYourGoalScreenState extends State<DefineYourGoalScreen> {
             image: NetworkImage(imageUrl),
             fit: BoxFit.cover,
             colorFilter: ColorFilter.mode(
-              Colors.black.withOpacity(isSelected ? 0.4 : 0.6),
+              Colors.black.withValues(alpha: isSelected ? 0.4 : 0.6),
               BlendMode.darken,
             ),
           ),
@@ -336,7 +336,7 @@ class _DefineYourGoalScreenState extends State<DefineYourGoalScreen> {
               height: 48,
               width: 48,
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.2),
+                color: primaryColor.withValues(alpha: 0.2),
                 shape: BoxShape.circle,
               ),
               child: const Icon(

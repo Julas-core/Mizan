@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'services/api_service.dart';
+import 'screens/home_screen.dart';
 import 'screens/income_setup_screen.dart';
 import 'screens/welcome_screen.dart';
 
@@ -8,19 +9,30 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ApiService.initialize();
   final prefs = await SharedPreferences.getInstance();
+  final onboardingCompleted = prefs.getBool('onboarding_completed') ?? false;
   final hasSeenWelcome = prefs.getBool('has_seen_welcome') ?? false;
 
   if (!hasSeenWelcome) {
     await prefs.setBool('has_seen_welcome', true);
   }
 
-  runApp(MizanApp(showWelcome: !hasSeenWelcome));
+  runApp(
+    MizanApp(
+      showWelcome: !hasSeenWelcome,
+      onboardingCompleted: onboardingCompleted,
+    ),
+  );
 }
 
 class MizanApp extends StatelessWidget {
-  const MizanApp({super.key, required this.showWelcome});
+  const MizanApp({
+    super.key,
+    required this.showWelcome,
+    required this.onboardingCompleted,
+  });
 
   final bool showWelcome;
+  final bool onboardingCompleted;
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +54,9 @@ class MizanApp extends StatelessWidget {
           displayColor: Colors.white,
         ),
       ),
-      home: showWelcome ? const WelcomeScreen() : const IncomeSetupScreen(),
+      home: onboardingCompleted
+          ? const HomeScreen()
+          : (showWelcome ? const WelcomeScreen() : const IncomeSetupScreen()),
     );
   }
 }

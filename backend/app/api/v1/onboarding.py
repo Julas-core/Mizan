@@ -73,3 +73,17 @@ def set_savings_goal(user_id: str, goal_in: GoalCreate, db: Session = Depends(de
     db.commit()
     db.refresh(db_goal)
     return db_goal
+
+
+@router.get("/{user_id}/goals", response_model=List[GoalSchema])
+def list_savings_goals(user_id: str, db: Session = Depends(dependencies.get_db)):
+    """
+    List all savings goals for a user.
+    """
+    get_user_or_404(db, user_id)
+    return (
+        db.query(GoalModel)
+        .filter(GoalModel.user_id == user_id)
+        .order_by(GoalModel.priority.asc())
+        .all()
+    )

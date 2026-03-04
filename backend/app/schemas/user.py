@@ -24,3 +24,14 @@ class UserSummary(BaseModel):
     total_monthly_income_cents: int
     total_monthly_fixed_expenses_cents: int
     total_goals_priority_weight: int
+
+
+class UserHabitsInsights(BaseModel):
+    main_behavior_trend: str
+    friday_overspend_percent: int
+    impulse_window: str
+    top_regret_category: str
+    high_regret_rate_percent: int
+    bought_purchases_count: int
+    total_bought_spend_last_30d_cents: int
+    behavioral_score: int

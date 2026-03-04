@@ -11,19 +11,20 @@ class ApiService {
   // Use local network IP for physical devices (override via --dart-define)
   static const String baseUrl = 'http://127.0.0.1:8000/api/v1';
   static const String emulatorBaseUrl = 'http://10.0.2.2:8000/api/v1';
+  static const String _defaultPhysicalDeviceBaseUrl =
+      'http://192.168.1.13:8000/api/v1';
   static const String physicalDeviceBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
-    defaultValue: 'http://192.168.1.13:8000/api/v1',
+    defaultValue: _defaultPhysicalDeviceBaseUrl,
   );
-  static const String mockUserId = 'test-user-123';
-  static String _currentUserId = mockUserId;
+  static String _currentUserId = '';
   static SharedPreferences? _prefs;
 
   static String get currentUserId => _currentUserId;
 
   static Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
-    _currentUserId = _prefs?.getString('current_user_id') ?? mockUserId;
+    _currentUserId = _prefs?.getString('current_user_id') ?? '';
   }
 
   static Future<void> _persistCurrentUserId(String userId) async {
@@ -32,27 +33,60 @@ class ApiService {
   }
 
   static List<String> _candidateBaseUrls() {
+    final hasCustomApiBase =
+        physicalDeviceBaseUrl != _defaultPhysicalDeviceBaseUrl;
+
+    final urls = <String>[];
+    void addUrl(String url) {
+      if (!urls.contains(url)) {
+        urls.add(url);
+      }
+    }
+
     if (kIsWeb) {
-      return [physicalDeviceBaseUrl, baseUrl];
+      addUrl(physicalDeviceBaseUrl);
+      if (!hasCustomApiBase) {
+        addUrl(baseUrl);
+      }
+      return urls;
     }
 
     if (defaultTargetPlatform == TargetPlatform.android) {
-      return [physicalDeviceBaseUrl, emulatorBaseUrl, baseUrl];
+      addUrl(physicalDeviceBaseUrl);
+      if (!hasCustomApiBase) {
+        addUrl(emulatorBaseUrl);
+        addUrl(baseUrl);
+      }
+      return urls;
     }
 
-    return [physicalDeviceBaseUrl, baseUrl];
+    addUrl(physicalDeviceBaseUrl);
+    if (!hasCustomApiBase) {
+      addUrl(baseUrl);
+    }
+    return urls;
+  }
+
+  static String _requireUserId() {
+    if (_currentUserId.isEmpty) {
+      throw Exception('No active user found. Complete onboarding first.');
+    }
+    return _currentUserId;
   }
 
   static Future<Map<String, dynamic>> getUserSummary() async {
+    final userId = _requireUserId();
     final urls = _candidateBaseUrls()
-        .map((url) => Uri.parse('$url/users/$currentUserId/summary'))
+        .map((url) => Uri.parse('$url/users/$userId/summary'))
         .toList();
 
     Object? lastError;
 
     for (final url in urls) {
       try {
-        final response = await http.get(url).timeout(const Duration(seconds: 6));
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 6));
 
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
@@ -66,14 +100,7 @@ class ApiService {
       }
     }
 
-    debugPrint('Falling back to mock summary. Last error: $lastError');
-    return {
-      'safe_to_spend_cents': 0,
-      'days_to_next_income': 0,
-      'total_monthly_income_cents': 0,
-      'total_monthly_fixed_expenses_cents': 0,
-      'total_goals_priority_weight': 0,
-    };
+    throw Exception('Unable to load summary. Last error: $lastError');
   }
 
   static Future<String> createUser() async {
@@ -125,8 +152,9 @@ class ApiService {
     required String nextPaydate,
     required double confidenceScore,
   }) async {
+    final userId = _requireUserId();
     final urls = _candidateBaseUrls()
-        .map((url) => Uri.parse('$url/onboarding/$currentUserId/income'))
+        .map((url) => Uri.parse('$url/onboarding/$userId/income'))
         .toList();
 
     Object? lastError;
@@ -168,8 +196,9 @@ class ApiService {
     required bool isFixed,
     required int? dueDateDay,
   }) async {
+    final userId = _requireUserId();
     final urls = _candidateBaseUrls()
-        .map((url) => Uri.parse('$url/onboarding/$currentUserId/expenses'))
+        .map((url) => Uri.parse('$url/onboarding/$userId/expenses'))
         .toList();
 
     Object? lastError;
@@ -211,8 +240,9 @@ class ApiService {
     required int priorityWeight,
     String? imageUrl,
   }) async {
+    final userId = _requireUserId();
     final urls = _candidateBaseUrls()
-        .map((url) => Uri.parse('$url/onboarding/$currentUserId/goal'))
+        .map((url) => Uri.parse('$url/onboarding/$userId/goal'))
         .toList();
 
     Object? lastError;
@@ -246,15 +276,67 @@ class ApiService {
     throw Exception('Unable to save goal. Last error: $lastError');
   }
 
-  // --- Decision Analysis API (Mocked from before) ---
+  static Future<List<Map<String, dynamic>>> getGoals() async {
+    final userId = _requireUserId();
+    final urls = _candidateBaseUrls()
+        .map((url) => Uri.parse('$url/onboarding/$userId/goals'))
+        .toList();
+
+    Object? lastError;
+    for (final url in urls) {
+      try {
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 6));
+        if (response.statusCode == 200) {
+          final decoded = jsonDecode(response.body) as List<dynamic>;
+          return decoded.cast<Map<String, dynamic>>();
+        }
+        lastError = Exception(
+          'Failed to load goals (${response.statusCode}): ${response.body}',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('Unable to load goals. Last error: $lastError');
+  }
+
+  static Future<Map<String, dynamic>> getHabitsInsights() async {
+    final userId = _requireUserId();
+    final urls = _candidateBaseUrls()
+        .map((url) => Uri.parse('$url/users/$userId/insights'))
+        .toList();
+
+    Object? lastError;
+    for (final url in urls) {
+      try {
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 6));
+        if (response.statusCode == 200) {
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        }
+        lastError = Exception(
+          'Failed to load insights (${response.statusCode}): ${response.body}',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('Unable to load insights. Last error: $lastError');
+  }
 
   static Future<Map<String, dynamic>> evaluatePurchase(
     String itemName,
     int priceCents,
     String category,
   ) async {
+    final userId = _requireUserId();
     final urls = _candidateBaseUrls()
-        .map((url) => Uri.parse('$url/decisions/$currentUserId/evaluate'))
+        .map((url) => Uri.parse('$url/decisions/$userId/evaluate'))
         .toList();
 
     Object? lastError;
@@ -287,13 +369,153 @@ class ApiService {
     throw Exception('Unable to evaluate purchase. Last error: $lastError');
   }
 
-  static Future<Map<String, dynamic>> getAiStatus() async {
-    final urls = _candidateBaseUrls().map((url) => Uri.parse('$url/health/ai')).toList();
+  static Future<Map<String, dynamic>> getLatestEvaluatedPurchase() async {
+    final userId = _requireUserId();
+    final urls = _candidateBaseUrls()
+        .map((url) => Uri.parse('$url/purchases/$userId/latest-evaluated'))
+        .toList();
 
     Object? lastError;
     for (final url in urls) {
       try {
-        final response = await http.get(url).timeout(const Duration(seconds: 6));
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 6));
+        if (response.statusCode == 200) {
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        }
+        lastError = Exception(
+          'Failed to load latest purchase (${response.statusCode}): ${response.body}',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('Unable to load latest purchase. Last error: $lastError');
+  }
+
+  static Future<Map<String, dynamic>> updatePurchaseStatus({
+    required String purchaseId,
+    required String status,
+  }) async {
+    final urls = _candidateBaseUrls()
+        .map((url) => Uri.parse('$url/purchases/$purchaseId/status'))
+        .toList();
+
+    Object? lastError;
+    for (final url in urls) {
+      try {
+        final response = await http
+            .patch(
+              url,
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({'status': status}),
+            )
+            .timeout(const Duration(seconds: 6));
+
+        if (response.statusCode == 200) {
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        }
+
+        lastError = Exception(
+          'Failed to update purchase status (${response.statusCode}): ${response.body}',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('Unable to update purchase status. Last error: $lastError');
+  }
+
+  static Future<List<Map<String, dynamic>>> getPassedPurchases() async {
+    final userId = _requireUserId();
+    final urls = _candidateBaseUrls()
+        .map(
+          (url) => Uri.parse(
+            '$url/purchases/$userId/history?status_filter=ABANDONED',
+          ),
+        )
+        .toList();
+
+    Object? lastError;
+    for (final url in urls) {
+      try {
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 6));
+
+        if (response.statusCode == 200) {
+          final List<dynamic> decoded = jsonDecode(response.body);
+          return decoded.cast<Map<String, dynamic>>();
+        }
+
+        lastError = Exception(
+          'Failed to load passed purchases (${response.statusCode}): ${response.body}',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('Unable to load passed purchases. Last error: $lastError');
+  }
+
+  static Future<Map<String, dynamic>> submitReflection({
+    required String purchaseId,
+    required int windowDays,
+    required int regretScore,
+    bool? feltFinancialPressure,
+    double? actualDaysImpacted,
+  }) async {
+    final urls = _candidateBaseUrls()
+        .map((url) => Uri.parse('$url/purchases/$purchaseId/reflect'))
+        .toList();
+
+    Object? lastError;
+    for (final url in urls) {
+      try {
+        final response = await http
+            .post(
+              url,
+              headers: {'Content-Type': 'application/json'},
+              body: jsonEncode({
+                'purchase_id': purchaseId,
+                'window_days': windowDays,
+                'regret_score': regretScore,
+                'felt_financial_pressure': feltFinancialPressure,
+                'actual_days_impacted': actualDaysImpacted,
+              }),
+            )
+            .timeout(const Duration(seconds: 8));
+
+        if (response.statusCode == 200 || response.statusCode == 201) {
+          return jsonDecode(response.body) as Map<String, dynamic>;
+        }
+
+        lastError = Exception(
+          'Failed to submit reflection (${response.statusCode}): ${response.body}',
+        );
+      } catch (error) {
+        lastError = error;
+      }
+    }
+
+    throw Exception('Unable to submit reflection. Last error: $lastError');
+  }
+
+  static Future<Map<String, dynamic>> getAiStatus() async {
+    final urls = _candidateBaseUrls()
+        .map((url) => Uri.parse('$url/health/ai'))
+        .toList();
+
+    Object? lastError;
+    for (final url in urls) {
+      try {
+        final response = await http
+            .get(url)
+            .timeout(const Duration(seconds: 6));
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         }

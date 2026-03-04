@@ -65,9 +65,9 @@ class _HomeScreenState extends State<HomeScreen> {
   void _evaluatePurchase() async {
     final item = _itemController.text;
     final priceStr = _priceController.text;
-    
+
     if (item.isEmpty || priceStr.isEmpty) return;
-    
+
     final priceCents = (double.parse(priceStr) * 100).toInt();
 
     setState(() {
@@ -82,20 +82,18 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (!mounted) return;
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => DecisionAnalysisScreen(
-            evaluationData: result,
-          ),
+          builder: (context) => DecisionAnalysisScreen(evaluationData: result),
         ),
       );
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Evaluation Error: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Evaluation Error: $e')));
     } finally {
       if (mounted) {
         setState(() {
@@ -108,11 +106,14 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF30e8c9);
-    
+
     return Scaffold(
       backgroundColor: const Color(0xFF11211e),
       appBar: AppBar(
-        title: const Text('Home: Decision Hub', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+        title: const Text(
+          'Home: Decision Hub',
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         centerTitle: true,
@@ -120,10 +121,14 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: const EdgeInsets.all(8.0),
           child: Container(
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.account_circle, color: primaryColor, size: 24),
+            child: const Icon(
+              Icons.account_circle,
+              color: primaryColor,
+              size: 24,
+            ),
           ),
         ),
         actions: [
@@ -131,11 +136,15 @@ class _HomeScreenState extends State<HomeScreen> {
             padding: const EdgeInsets.all(8.0),
             child: Container(
               decoration: BoxDecoration(
-                color: primaryColor.withOpacity(0.1),
+                color: primaryColor.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: IconButton(
-                icon: const Icon(Icons.notifications, color: Colors.white, size: 20),
+                icon: const Icon(
+                  Icons.notifications,
+                  color: Colors.white,
+                  size: 20,
+                ),
                 onPressed: () {},
               ),
             ),
@@ -154,10 +163,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: primaryColor.withOpacity(0.1),
+                    color: primaryColor.withValues(alpha: 0.1),
                     blurRadius: 20,
                     spreadRadius: 0,
-                  )
+                  ),
                 ],
               ),
               padding: const EdgeInsets.all(24),
@@ -166,7 +175,11 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   const Text(
                     'Empowering your choices',
-                    style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const Text(
@@ -186,13 +199,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   TextField(
                     controller: _priceController,
-                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: const TextInputType.numberWithOptions(
+                      decimal: true,
+                    ),
                     style: const TextStyle(color: Colors.white, fontSize: 16),
                     decoration: InputDecoration(
                       hintText: 'Price (\$)',
@@ -203,7 +221,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         borderRadius: BorderRadius.circular(8),
                         borderSide: BorderSide.none,
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -224,11 +245,17 @@ class _HomeScreenState extends State<HomeScreen> {
                           ? const SizedBox(
                               height: 24,
                               width: 24,
-                              child: CircularProgressIndicator(color: Color(0xFF11211e), strokeWidth: 2),
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF11211e),
+                                strokeWidth: 2,
+                              ),
                             )
                           : const Text(
                               'Evaluate Decision',
-                              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                     ),
                   ),
@@ -266,7 +293,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1e293b),
-                      border: Border.all(color: primaryColor.withOpacity(0.1)),
+                      border: Border.all(
+                        color: primaryColor.withValues(alpha: 0.1),
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -274,15 +303,32 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.calendar_today, color: Colors.white54, size: 16),
+                            const Icon(
+                              Icons.calendar_today,
+                              color: Colors.white54,
+                              size: 16,
+                            ),
                             const SizedBox(width: 8),
-                            Text('NEXT INCOME', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white.withOpacity(0.5))),
+                            Text(
+                              'NEXT INCOME',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white.withValues(alpha: 0.5),
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          _isSummaryLoading ? '...' : '${_summary?['days_to_next_income'] ?? '0'} days', 
-                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
+                          _isSummaryLoading
+                              ? '...'
+                              : '${_summary?['days_to_next_income'] ?? '0'} days',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
@@ -294,7 +340,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
                       color: const Color(0xFF1e293b),
-                      border: Border.all(color: primaryColor.withOpacity(0.1)),
+                      border: Border.all(
+                        color: primaryColor.withValues(alpha: 0.1),
+                      ),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -302,30 +350,54 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         Row(
                           children: [
-                            Icon(Icons.verified_user, color: primaryColor, size: 16),
+                            Icon(
+                              Icons.verified_user,
+                              color: primaryColor,
+                              size: 16,
+                            ),
                             const SizedBox(width: 8),
-                            Text('SAFE-TO-SPEND', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: primaryColor)),
+                            Text(
+                              'SAFE-TO-SPEND',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: primaryColor,
+                              ),
+                            ),
                           ],
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          _isSummaryLoading ? '...' : '\$${((_summary?['safe_to_spend_cents'] ?? 0) / 100).toStringAsFixed(2)}', 
-                          style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold)
+                          _isSummaryLoading
+                              ? '...'
+                              : '\$${((_summary?['safe_to_spend_cents'] ?? 0) / 100).toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ],
                     ),
                   ),
                 ),
               ],
-            )
+            ),
           ],
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(top: 12, bottom: 24, left: 24, right: 24),
+        padding: const EdgeInsets.only(
+          top: 12,
+          bottom: 24,
+          left: 24,
+          right: 24,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF0f172a), // Very dark slate
-          border: Border(top: BorderSide(color: primaryColor.withOpacity(0.1))),
+          border: Border(
+            top: BorderSide(color: primaryColor.withValues(alpha: 0.1)),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -340,13 +412,17 @@ class _HomeScreenState extends State<HomeScreen> {
             _buildNavItem(Icons.add, 'New', false, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const DecisionInputScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const DecisionInputScreen(),
+                ),
               );
             }),
             _buildNavItem(Icons.insights, 'Insights', false, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (context) => const PurchaseReflectionScreen()),
+                MaterialPageRoute(
+                  builder: (context) => const PurchaseReflectionScreen(),
+                ),
               );
             }),
             _buildNavItem(Icons.track_changes, 'Goals', false, () {
@@ -361,13 +437,22 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isActive, VoidCallback? onTap) {
+  Widget _buildNavItem(
+    IconData icon,
+    String label,
+    bool isActive,
+    VoidCallback? onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isActive ? const Color(0xFF30e8c9) : Colors.white54, size: 24),
+          Icon(
+            icon,
+            color: isActive ? const Color(0xFF30e8c9) : Colors.white54,
+            size: 24,
+          ),
           const SizedBox(height: 4),
           Text(
             label,

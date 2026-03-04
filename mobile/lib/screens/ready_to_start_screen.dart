@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_screen.dart';
 
 class ReadyToStartScreen extends StatefulWidget {
@@ -24,7 +25,10 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
           children: [
             // Top Navigation
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 children: [
                   IconButton(
@@ -57,12 +61,17 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                       width: double.infinity,
                       height: 300,
                       decoration: BoxDecoration(
-                        color: primaryColor.withOpacity(0.1),
+                        color: primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(24),
                         image: const DecorationImage(
-                          image: NetworkImage('https://images.unsplash.com/photo-1579389083078-4e7018379f7e?q=80&w=1000&auto=format&fit=crop'),
+                          image: NetworkImage(
+                            'https://images.unsplash.com/photo-1579389083078-4e7018379f7e?q=80&w=1000&auto=format&fit=crop',
+                          ),
                           fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(Colors.black38, BlendMode.darken),
+                          colorFilter: ColorFilter.mode(
+                            Colors.black38,
+                            BlendMode.darken,
+                          ),
                         ),
                       ),
                       child: Container(
@@ -72,7 +81,7 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              bgDark.withOpacity(0.8),
+                              bgDark.withValues(alpha: 0.8),
                               Colors.transparent,
                             ],
                           ),
@@ -105,9 +114,11 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: surfaceDark.withOpacity(0.5),
+                        color: surfaceDark.withValues(alpha: 0.5),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: primaryColor.withOpacity(0.2)),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.2),
+                        ),
                       ),
                       child: Row(
                         children: [
@@ -117,7 +128,11 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                               children: [
                                 Row(
                                   children: [
-                                    const Icon(Icons.notifications_active, color: primaryColor, size: 20),
+                                    const Icon(
+                                      Icons.notifications_active,
+                                      color: primaryColor,
+                                      size: 20,
+                                    ),
                                     const SizedBox(width: 8),
                                     const Text(
                                       'Enable Notifications',
@@ -163,10 +178,14 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                           height: 64,
                           width: 64,
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.2),
+                            color: primaryColor.withValues(alpha: 0.2),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.verified, color: primaryColor, size: 32),
+                          child: const Icon(
+                            Icons.verified,
+                            color: primaryColor,
+                            size: 32,
+                          ),
                         ),
                         const SizedBox(height: 16),
                         const Text(
@@ -180,10 +199,7 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                         const SizedBox(height: 8),
                         const Text(
                           "Welcome to your new way of making better choices.",
-                          style: TextStyle(
-                            color: Colors.white54,
-                            fontSize: 16,
-                          ),
+                          style: TextStyle(color: Colors.white54, fontSize: 16),
                         ),
                       ],
                     ),
@@ -202,10 +218,14 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                     width: double.infinity,
                     height: 56,
                     child: ElevatedButton(
-                      onPressed: () {
-                         Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => const HomeScreen()),
+                      onPressed: () async {
+                        final navigator = Navigator.of(context);
+                        final prefs = await SharedPreferences.getInstance();
+                        await prefs.setBool('onboarding_completed', true);
+                        navigator.pushReplacement(
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
@@ -219,7 +239,13 @@ class _ReadyToStartScreenState extends State<ReadyToStartScreen> {
                       child: const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Text('Enter Decision Hub', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                          Text(
+                            'Enter Decision Hub',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                           SizedBox(width: 12),
                           Icon(Icons.rocket_launch, size: 24),
                         ],

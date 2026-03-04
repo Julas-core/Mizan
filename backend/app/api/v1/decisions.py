@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 from datetime import date
 
 from app.api import dependencies
@@ -11,11 +12,17 @@ from app.services.decision_engine import (
     EngineIncome, EngineExpense, EngineGoal, evaluate_purchase
 )
 from app.services.llm_service import generate_insight
+from app.services.idempotency_service import get_idempotent_payload, persist_idempotent_payload
 
 router = APIRouter()
 
 @router.post("/{user_id}/evaluate", response_model=PurchaseEvaluateResponse)
-async def evaluate_item(user_id: str, request: PurchaseEvaluateRequest, db: Session = Depends(dependencies.get_db)):
+async def evaluate_item(
+    user_id: str,
+    request: PurchaseEvaluateRequest,
+    db: Session = Depends(dependencies.get_db),
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+):
     """
     Evaluates a potential purchase against the user's financial reality.
     Uses pure mathematical pure functions internally to simulate 30-day cashflow horizons.
@@ -23,6 +30,12 @@ async def evaluate_item(user_id: str, request: PurchaseEvaluateRequest, db: Sess
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
+
+    endpoint_key = f"decisions.evaluate:{user_id}"
+    if idempotency_key:
+        replay_payload = get_idempotent_payload(db, endpoint_key, idempotency_key)
+        if replay_payload:
+            return PurchaseEvaluateResponse(**replay_payload)
         
     # Map SQLAlchemy ORM models directly to the Engine's Input Models (Pure dependencies)
     engine_incomes = [
@@ -94,11 +107,10 @@ async def evaluate_item(user_id: str, request: PurchaseEvaluateRequest, db: Sess
         status="EVALUATED"
     )
     db.add(db_purchase)
-    db.commit()
-    db.refresh(db_purchase)
+    db.flush()
 
     # Map the algorithm output format to our REST Response Pydantic Schema
-    return PurchaseEvaluateResponse(
+    response_payload = PurchaseEvaluateResponse(
         purchase_id=db_purchase.id,
         affordability_score=evaluation.affordability_score,
         risk_level=evaluation.risk_level,
@@ -108,3 +120,25 @@ async def evaluate_item(user_id: str, request: PurchaseEvaluateRequest, db: Sess
         goals_delayed=evaluation.goals_delayed,
         ai_insight=insight
     )
+
+    if idempotency_key:
+        persist_idempotent_payload(
+            db=db,
+            endpoint=endpoint_key,
+            idempotency_key=idempotency_key,
+            payload=response_payload.model_dump(),
+            resource_type="purchase",
+            resource_id=db_purchase.id,
+        )
+
+    try:
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        if idempotency_key:
+            replay_payload = get_idempotent_payload(db, endpoint_key, idempotency_key)
+            if replay_payload:
+                return PurchaseEvaluateResponse(**replay_payload)
+        raise
+
+    return response_payload

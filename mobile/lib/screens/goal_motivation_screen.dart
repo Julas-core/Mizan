@@ -1,7 +1,72 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
-class GoalMotivationScreen extends StatelessWidget {
+class GoalMotivationScreen extends StatefulWidget {
   const GoalMotivationScreen({super.key});
+
+  @override
+  State<GoalMotivationScreen> createState() => _GoalMotivationScreenState();
+}
+
+class _GoalMotivationScreenState extends State<GoalMotivationScreen> {
+  bool _isLoading = true;
+  List<Map<String, dynamic>> _passedPurchases = [];
+  int _totalSavedCents = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPassedPurchases();
+  }
+
+  Future<void> _loadPassedPurchases() async {
+    try {
+      final purchases = await ApiService.getPassedPurchases();
+      int saved = 0;
+      for (var p in purchases) {
+        saved += (p['price_cents'] as int?) ?? 0;
+      }
+      if (mounted) {
+        setState(() {
+          _passedPurchases = purchases;
+          _totalSavedCents = saved;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+      debugPrint('Failed to load passed purchases: $e');
+    }
+  }
+
+  String _formatDate(String dateStr) {
+    try {
+      final date = DateTime.parse(dateStr);
+      final now = DateTime.now();
+      final difference = now.difference(date).inDays;
+      if (difference == 0) return 'Passed today';
+      if (difference == 1) return 'Passed yesterday';
+      return 'Passed ${date.month}/${date.day}';
+    } catch (e) {
+      return 'Passed recently';
+    }
+  }
+
+  IconData _getIconForCategory(String? category) {
+    if (category == null) return Icons.shopping_bag;
+    final lower = category.toLowerCase();
+    if (lower.contains('food') || lower.contains('restaurant'))
+      return Icons.restaurant;
+    if (lower.contains('tech') || lower.contains('gadget'))
+      return Icons.computer;
+    if (lower.contains('clothes') || lower.contains('shoes'))
+      return Icons.checkroom;
+    return Icons.shopping_bag;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +81,10 @@ class GoalMotivationScreen extends StatelessWidget {
           children: [
             // Header
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 12.0,
+              ),
               child: Row(
                 children: [
                   IconButton(
@@ -55,13 +123,18 @@ class GoalMotivationScreen extends StatelessWidget {
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(16),
                         image: const DecorationImage(
-                          image: NetworkImage('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop'),
+                          image: NetworkImage(
+                            'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1000&auto=format&fit=crop',
+                          ),
                           fit: BoxFit.cover,
-                          colorFilter: ColorFilter.mode(Colors.black38, BlendMode.darken),
+                          colorFilter: ColorFilter.mode(
+                            Colors.black38,
+                            BlendMode.darken,
+                          ),
                         ),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withOpacity(0.3),
+                            color: Colors.black.withValues(alpha: 0.3),
                             blurRadius: 10,
                             offset: const Offset(0, 4),
                           ),
@@ -74,7 +147,7 @@ class GoalMotivationScreen extends StatelessWidget {
                             begin: Alignment.bottomCenter,
                             end: Alignment.topCenter,
                             colors: [
-                              Colors.black.withOpacity(0.8),
+                              Colors.black.withValues(alpha: 0.8),
                               Colors.transparent,
                             ],
                           ),
@@ -104,12 +177,16 @@ class GoalMotivationScreen extends StatelessWidget {
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                const Icon(Icons.location_on, color: primaryColor, size: 16),
+                                const Icon(
+                                  Icons.location_on,
+                                  color: primaryColor,
+                                  size: 16,
+                                ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'North Malé Atoll, Maldives',
                                   style: TextStyle(
-                                    color: Colors.white.withOpacity(0.8),
+                                    color: Colors.white.withValues(alpha: 0.8),
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -127,9 +204,11 @@ class GoalMotivationScreen extends StatelessWidget {
                     Container(
                       padding: const EdgeInsets.all(20),
                       decoration: BoxDecoration(
-                        color: surfaceDark.withOpacity(0.3),
+                        color: surfaceDark.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: primaryColor.withOpacity(0.1)),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.1),
+                        ),
                       ),
                       child: Column(
                         children: [
@@ -196,7 +275,9 @@ class GoalMotivationScreen extends StatelessWidget {
                           const SizedBox(height: 16),
                           LinearProgressIndicator(
                             value: 0.72,
-                            backgroundColor: primaryColor.withOpacity(0.1),
+                            backgroundColor: primaryColor.withValues(
+                              alpha: 0.1,
+                            ),
                             color: primaryColor,
                             minHeight: 12,
                             borderRadius: BorderRadius.circular(6),
@@ -228,11 +309,19 @@ class GoalMotivationScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: _buildWhyCard(Icons.self_care, 'Mental Reset', 'Disconnecting from work stress for 10 days.'),
+                          child: _buildWhyCard(
+                            Icons.spa,
+                            'Mental Reset',
+                            'Disconnecting from work stress for 10 days.',
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
-                          child: _buildWhyCard(Icons.favorite, 'Connection', 'Quality time with family without distractions.'),
+                          child: _buildWhyCard(
+                            Icons.favorite,
+                            'Connection',
+                            'Quality time with family without distractions.',
+                          ),
                         ),
                       ],
                     ),
@@ -250,9 +339,12 @@ class GoalMotivationScreen extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
-                            color: primaryColor.withOpacity(0.2),
+                            color: primaryColor.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: const Text(
@@ -267,33 +359,59 @@ class GoalMotivationScreen extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _buildDecisionItem(Icons.shopping_bag, 'Skipped New Sneakers', '+\$120', 'Passed on 3rd June • Added to Maldives Goal'),
-                    const SizedBox(height: 8),
-                    _buildDecisionItem(Icons.restaurant, 'Cooked at Home', '+\$45', 'Passed on yesterday • Added to Maldives Goal'),
+                    if (_isLoading)
+                      const Center(
+                        child: CircularProgressIndicator(color: primaryColor),
+                      )
+                    else if (_passedPurchases.isEmpty)
+                      const Text(
+                        'No passed purchases yet. Keep up the good work!',
+                        style: TextStyle(color: Colors.white70),
+                      )
+                    else
+                      ..._passedPurchases.map((purchase) {
+                        final title = purchase['item_name'] ?? 'Item';
+                        final price =
+                            '\$${((purchase['price_cents'] ?? 0) / 100).toStringAsFixed(2)}';
+                        final dateStr = _formatDate(
+                          purchase['created_at'] ?? '',
+                        );
+                        final icon = _getIconForCategory(purchase['category']);
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: _buildDecisionItem(
+                            icon,
+                            title,
+                            '+$price',
+                            dateStr,
+                          ),
+                        );
+                      }),
                     const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: primaryColor,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Row(
-                        children: [
-                          Icon(Icons.bolt, color: bgDark),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: Text(
-                              'Your smart choices saved \$480 this month, moving your trip 14 days closer!',
-                              style: TextStyle(
-                                color: bgDark,
-                                fontSize: 13,
-                                fontWeight: FontWeight.bold,
+                    if (_passedPurchases.isNotEmpty)
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: primaryColor,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.bolt, color: bgDark),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                'Your smart choices saved \$${(_totalSavedCents / 100).toStringAsFixed(2)} this month!',
+                                style: const TextStyle(
+                                  color: bgDark,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
                     const SizedBox(height: 80),
                   ],
                 ),
@@ -310,8 +428,8 @@ class GoalMotivationScreen extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: primaryColor.withOpacity(0.05),
-        border: Border.all(color: primaryColor.withOpacity(0.2)),
+        color: primaryColor.withValues(alpha: 0.05),
+        border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
@@ -341,22 +459,27 @@ class GoalMotivationScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDecisionItem(IconData icon, String title, String amount, String subtitle) {
+  Widget _buildDecisionItem(
+    IconData icon,
+    String title,
+    String amount,
+    String subtitle,
+  ) {
     const primaryColor = Color(0xFF30e8c9);
     const surfaceDark = Color(0xFF1e293b);
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: surfaceDark.withOpacity(0.3),
+        color: surfaceDark.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: primaryColor.withOpacity(0.1),
+              color: primaryColor.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
             child: Icon(icon, color: primaryColor, size: 20),
@@ -390,10 +513,7 @@ class GoalMotivationScreen extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
-                    color: Colors.white38,
-                    fontSize: 11,
-                  ),
+                  style: const TextStyle(color: Colors.white38, fontSize: 11),
                 ),
               ],
             ),

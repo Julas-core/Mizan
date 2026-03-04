@@ -7,10 +7,28 @@ class DecisionAnalysisScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final score = evaluationData['affordability_score'] ?? 0;
+    final score = (evaluationData['affordability_score'] is num)
+      ? (evaluationData['affordability_score'] as num).toInt()
+      : 0;
     final riskLevel = evaluationData['risk_level'] ?? 'Unknown';
     final aiInsight = evaluationData['ai_insight'] ?? 'No insight available.';
-    final daysImpacted = (evaluationData['days_impacted'] ?? evaluationData['days_impacted_predicted'] ?? 0).toDouble();
+    final daysImpactedRaw =
+      evaluationData['days_impacted'] ?? evaluationData['days_impacted_predicted'];
+    final daysImpacted = (daysImpactedRaw is num) ? daysImpactedRaw.toDouble() : 0.0;
+    final evaluatedPriceRaw = evaluationData['price_cents'];
+    final evaluatedPriceCents =
+      (evaluatedPriceRaw is num) ? evaluatedPriceRaw.toInt() : 0;
+    final goalsDelayed = evaluationData['goals_delayed'] as Map<String, dynamic>?;
+    final delayedGoalsCount = goalsDelayed == null
+        ? 0
+        : goalsDelayed.entries.where((entry) {
+            final value = entry.value;
+            if (value is num) {
+              return value > 0;
+            }
+            return false;
+          }).length;
+    final liquidityFailure = evaluationData['liquidity_failure'] == true;
     
     // Determine color based on risk level
     Color statusColor = const Color(0xFF30e8c9); // Primary teal
@@ -62,7 +80,7 @@ class DecisionAnalysisScreen extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
               decoration: BoxDecoration(
-                color: surfaceDark.withOpacity(0.5),
+                color: surfaceDark.withValues(alpha: 0.5),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
@@ -128,8 +146,8 @@ class DecisionAnalysisScreen extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: brandPrimary.withOpacity(0.1),
-                      border: Border.all(color: brandPrimary.withOpacity(0.2)),
+                      color: brandPrimary.withValues(alpha: 0.1),
+                      border: Border.all(color: brandPrimary.withValues(alpha: 0.2)),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
@@ -157,7 +175,7 @@ class DecisionAnalysisScreen extends StatelessWidget {
                   _MetricCard(
                     icon: Icons.hourglass_empty,
                     iconColor: Colors.orangeAccent,
-                    iconBgColor: Colors.orange.withOpacity(0.2),
+                    iconBgColor: Colors.orange.withValues(alpha: 0.2),
                     title: 'DELAY IMPACT',
                     description: 'Delays your goals by ',
                     boldDescription: '${daysImpacted.toStringAsFixed(1)} days',
@@ -166,19 +184,23 @@ class DecisionAnalysisScreen extends StatelessWidget {
                   _MetricCard(
                     icon: Icons.movie_outlined,
                     iconColor: Colors.blueAccent,
-                    iconBgColor: Colors.blue.withOpacity(0.2),
+                    iconBgColor: Colors.blue.withValues(alpha: 0.2),
                     title: 'OPPORTUNITY COST',
                     description: 'Equivalent to ',
-                    boldDescription: '${(priceCents(evaluationData) / 1200).ceil()} movie nights', // rough estimate
+                    boldDescription: '${(evaluatedPriceCents / 1200).ceil()} movie nights',
                   ),
                   const SizedBox(height: 12),
                   _MetricCard(
                     icon: Icons.speed,
                     iconColor: Colors.redAccent,
-                    iconBgColor: Colors.red.withOpacity(0.2),
+                    iconBgColor: Colors.red.withValues(alpha: 0.2),
                     title: 'FINANCIAL PRESSURE',
-                    description: 'Reduces safe weekly spending',
-                    boldDescription: '', // Simplified for UI
+                    description: liquidityFailure
+                        ? 'Triggers immediate cashflow stress'
+                        : 'Potentially delays ',
+                    boldDescription: liquidityFailure
+                        ? ''
+                        : '$delayedGoalsCount goal(s)',
                   ),
                 ],
               ),
@@ -187,16 +209,6 @@ class DecisionAnalysisScreen extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  // helper to safely extract price for mock calculation if present, else default
-  int priceCents(Map<String,dynamic> data) {
-      if(data['affordability_score'] != null) {
-          // just a mock proxy mapping 
-          if(data['affordability_score'] < 20) return 250000;
-          if(data['affordability_score'] < 60) return 60000;
-      }
-      return 15000;
   }
 }
 

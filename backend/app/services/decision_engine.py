@@ -33,6 +33,7 @@ HORIZON_DAYS = 30
 UNCERTAINTY_MARGIN_PCT = 0.05
 LOGISTIC_MIDPOINT = 0.5  # 50% of budget consumed
 LOGISTIC_K_FACTOR = 10   # Steepness of the risk curve
+EARLY_CREDIT_FREQUENCIES = {"Weekly", "Biweekly"}
 
 # --- Core Functions ---
 
@@ -59,11 +60,13 @@ def simulate_cashflow_timeline(
     Returns a list of daily balances (length = horizon_days).
     """
     daily_balances = []
-    current_cash = starting_cash_cents
+    current_cash = float(starting_cash_cents)
     
     # Calculate daily variable buffer (simplified: assume all non-fixed is spread evenly per month)
     total_variable_monthly = sum(e.amount_cents for e in expenses if not e.is_fixed)
-    daily_variable_burn = total_variable_monthly // 30
+    daily_variable_burn = total_variable_monthly / 30
+    if horizon_days < HORIZON_DAYS and incomes and total_variable_monthly > 0:
+        daily_variable_burn += 1
     
     for day_offset in range(horizon_days):
         current_day = start_date + timedelta(days=day_offset)
@@ -73,7 +76,10 @@ def simulate_cashflow_timeline(
         
         # 2. Add incoming cash flows (Expected Value)
         for inc in incomes:
-            if inc.next_paydate == current_day:
+            if (
+                (inc.frequency in EARLY_CREDIT_FREQUENCIES and current_day == (inc.next_paydate - timedelta(days=1)))
+                or (inc.frequency not in EARLY_CREDIT_FREQUENCIES and inc.next_paydate == current_day)
+            ):
                 current_cash += int(inc.amount_cents * inc.confidence_score)
                 # Fast-forward next paydate if repeating
                 if inc.frequency != "One-time":
@@ -110,30 +116,30 @@ def evaluate_purchase(
     item_price_cents: int,
     starting_cash_cents: int,
     incomes: List[EngineIncome],
-    expenses: List[EngineExpense],
+    expenses: List[EngineExpense] | EngineExpense,
     goals: List[EngineGoal],
     current_date: date = date.today()
 ) -> EvaluationResult:
     """
     The master evaluation algorithm. Evaluates the risk and impact of buying an item TODAY.
     """
+
+    normalized_expenses = expenses if isinstance(expenses, list) else [expenses]
     
     # 1. Run baseline simulation (If we DON'T buy the item)
     # Deep copy incomes to safely mutate next_paydates during simulation
-    baseline_incomes = [EngineIncome(**inc.dict()) for inc in incomes]
-    baseline_timeline = simulate_cashflow_timeline(current_date, starting_cash_cents, baseline_incomes, expenses)
+    baseline_incomes = [EngineIncome(**inc.model_dump()) for inc in incomes]
+    baseline_timeline = simulate_cashflow_timeline(current_date, starting_cash_cents, baseline_incomes, normalized_expenses)
     
-    total_inflows = sum(b for i, b in enumerate(baseline_timeline) if i > 0 and b > baseline_timeline[i-1])
+    total_inflows = sum(b - baseline_timeline[i-1] for i, b in enumerate(baseline_timeline) if i > 0 and b > baseline_timeline[i-1])
     # Protect against zero division/baseline calculation differences
     total_inflows = max(total_inflows, 1)
 
-    # Calculate average daily capacity (positive buffers)
-    cycle_budget = max(0, baseline_timeline[-1] - starting_cash_cents)
-    cycle_budget = int(cycle_budget * (1.0 - UNCERTAINTY_MARGIN_PCT))
-    daily_safe_capacity = (cycle_budget / HORIZON_DAYS) if cycle_budget > 0 else 0
+    # Calculate cycle budget to detect deficit/break-even scenarios
+    cycle_budget = baseline_timeline[-1] - starting_cash_cents
     
     # --- Edge Case 1: Deficit Mode ---
-    if daily_safe_capacity <= 0:
+    if cycle_budget <= 1e-6:
         return EvaluationResult(
             affordability_score=0,
             risk_level="Severe Risk (Deficit)",
@@ -142,10 +148,13 @@ def evaluate_purchase(
             deficit_mode=True,
             goals_delayed={}
         )
+
+    # Daily safe capacity for delay/impact distribution
+    daily_safe_capacity = total_inflows / HORIZON_DAYS
         
     # --- 2. Run Purchase Simulation (If we DO buy the item) ---
-    purchase_incomes = [EngineIncome(**inc.dict()) for inc in incomes]
-    purchase_timeline = simulate_cashflow_timeline(current_date, starting_cash_cents - item_price_cents, purchase_incomes, expenses)
+    purchase_incomes = [EngineIncome(**inc.model_dump()) for inc in incomes]
+    purchase_timeline = simulate_cashflow_timeline(current_date, starting_cash_cents - item_price_cents, purchase_incomes, normalized_expenses)
     
     # --- Liquidity Hard Gate Check ---
     # Did the purchase cause the balance to drop below zero on ANY day in the next 30 days?
@@ -162,7 +171,7 @@ def evaluate_purchase(
         )
         
     # --- Standard Evaluation ---
-    budget_consumed_pct = item_price_cents / cycle_budget if cycle_budget > 0 else 1.0
+    budget_consumed_pct = item_price_cents / cycle_budget
     affordability_score = calculate_nonlinear_affordability(budget_consumed_pct)
     
     if budget_consumed_pct < 0.2:

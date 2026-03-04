@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../services/api_service.dart';
 
 import 'create_custom_goal_screen.dart';
 import 'decision_input_screen.dart';
@@ -6,8 +7,40 @@ import 'habits_screen.dart';
 import 'home_screen.dart';
 import 'purchase_reflection_screen.dart';
 
-class GoalsHubScreen extends StatelessWidget {
+class GoalsHubScreen extends StatefulWidget {
   const GoalsHubScreen({super.key});
+
+  @override
+  State<GoalsHubScreen> createState() => _GoalsHubScreenState();
+}
+
+class _GoalsHubScreenState extends State<GoalsHubScreen> {
+  bool _isLoading = true;
+  String? _error;
+  List<Map<String, dynamic>> _goals = const [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadGoals();
+  }
+
+  Future<void> _loadGoals() async {
+    try {
+      final goals = await ApiService.getGoals();
+      if (!mounted) return;
+      setState(() {
+        _goals = goals;
+        _isLoading = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _error = e.toString();
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,27 +61,81 @@ class GoalsHubScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: surfaceDark,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: primaryColor.withValues(alpha: 0.2)),
-              ),
-              child: const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Primary Goal',
-                    style: TextStyle(color: Colors.white54, fontSize: 12),
-                  ),
-                  SizedBox(height: 8),
-                  Text(
-                    'Track and adjust your active savings goals from here.',
-                    style: TextStyle(color: Colors.white, fontSize: 16),
-                  ),
-                ],
-              ),
+            Expanded(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : _error != null
+                  ? Center(
+                      child: Text(
+                        'Unable to load goals\n$_error',
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(color: Colors.white70),
+                      ),
+                    )
+                  : _goals.isEmpty
+                  ? Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: surfaceDark,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: const Text(
+                        'No goals saved yet. Create your first goal to start tracking it here.',
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    )
+                  : ListView.separated(
+                      itemCount: _goals.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      itemBuilder: (context, index) {
+                        final goal = _goals[index];
+                        final cents =
+                            (goal['target_amount_cents'] as num?)?.toInt() ?? 0;
+                        final amount = (cents / 100).toStringAsFixed(2);
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: surfaceDark,
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: primaryColor.withValues(alpha: 0.15),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${goal['name'] ?? 'Goal'}',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 6),
+                              Text(
+                                'Target: \$$amount',
+                                style: const TextStyle(
+                                  color: Colors.white70,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                'Priority: ${goal['priority'] ?? '-'}',
+                                style: const TextStyle(
+                                  color: Colors.white54,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -58,7 +145,8 @@ class GoalsHubScreen extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => const CreateCustomGoalScreen(isCustomGoal: true),
+                      builder: (_) =>
+                          const CreateCustomGoalScreen(isCustomGoal: true),
                     ),
                   );
                 },
@@ -73,10 +161,17 @@ class GoalsHubScreen extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.only(top: 12, bottom: 24, left: 24, right: 24),
+        padding: const EdgeInsets.only(
+          top: 12,
+          bottom: 24,
+          left: 24,
+          right: 24,
+        ),
         decoration: BoxDecoration(
           color: const Color(0xFF0f172a),
-          border: Border(top: BorderSide(color: primaryColor.withValues(alpha: 0.1))),
+          border: Border(
+            top: BorderSide(color: primaryColor.withValues(alpha: 0.1)),
+          ),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,7 +197,9 @@ class GoalsHubScreen extends StatelessWidget {
             _buildNavItem(Icons.insights, 'Insights', false, () {
               Navigator.pushReplacement(
                 context,
-                MaterialPageRoute(builder: (_) => const PurchaseReflectionScreen()),
+                MaterialPageRoute(
+                  builder: (_) => const PurchaseReflectionScreen(),
+                ),
               );
             }),
             _buildNavItem(Icons.track_changes, 'Goals', true, null),

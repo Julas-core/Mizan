@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from datetime import date, timedelta
+from datetime import date
 from app.api import dependencies
 from app.models.user import User as UserModel
 from app.schemas.user import User as UserSchema, UserCreate, UserSummary
 from app.services.decision_engine import (
-    EngineIncome, EngineExpense, evaluate_purchase
+    EngineIncome, EngineExpense
 )
 
 router = APIRouter()
@@ -58,35 +58,47 @@ def get_user_summary(user_id: str, db: Session = Depends(dependencies.get_db)):
     ]
 
     # Calculate days to next income
-    days_to_next = 99 # Default
+    days_to_next = 30 # Default
     today = date.today()
     for inc in user.incomes:
         delta = (inc.next_paydate - today).days
         if 0 <= delta < days_to_next:
             days_to_next = delta
 
-    # Run a mock 0-cent evaluation to get the engine's safe_to_spend_cents (daily_safe_capacity)
-    evaluation = evaluate_purchase(
-        item_price_cents=0,
-        starting_cash_cents=0,
-        incomes=engine_incomes,
-        expenses=engine_expenses,
-        goals=[], # simplified for summary
-        current_date=today
-    )
+    # Calculate dynamic weekly capacity using the decision engine's simulation logic
+    from app.services.decision_engine import simulate_cashflow_timeline, HORIZON_DAYS, UNCERTAINTY_MARGIN_PCT
 
-    # We'll return "Weekly Safe-to-Spend" as it's common in finance apps
-    # Based on engine's internal Daily Capacity
-    # Note: cycle_budget calculation is internal to evaluate_purchase
-    # We'll approximate safe_to_spend per week
+    # Derive a baseline starting cash from expected monthly net so we don't
+    # under-report safe spend purely because today's balance isn't tracked yet.
+    projected_monthly_income = 0
+    for inc in engine_incomes:
+        if inc.frequency == "Monthly":
+            projected_monthly_income += inc.amount_cents * inc.confidence_score
+        elif inc.frequency == "Biweekly":
+            projected_monthly_income += inc.amount_cents * 2 * inc.confidence_score
+        elif inc.frequency == "Weekly":
+            projected_monthly_income += inc.amount_cents * 4 * inc.confidence_score
+        elif inc.frequency == "One-time":
+            projected_monthly_income += inc.amount_cents * inc.confidence_score
+
+    projected_monthly_fixed = sum(exp.amount_cents for exp in engine_expenses if exp.is_fixed)
+    baseline_starting_cash = int(max(0, projected_monthly_income - projected_monthly_fixed))
+
+    baseline_incomes = [EngineIncome(**inc.model_dump()) for inc in engine_incomes]
+    baseline_timeline = simulate_cashflow_timeline(today, baseline_starting_cash, baseline_incomes, engine_expenses)
+
+    cycle_budget = max(0, baseline_timeline[-1])
+    cycle_budget = int(cycle_budget * (1.0 - UNCERTAINTY_MARGIN_PCT))
+    daily_safe_capacity = (cycle_budget / HORIZON_DAYS) if cycle_budget > 0 else 0
+    weekly_safe_to_spend_cents = int(daily_safe_capacity * 7)
     
     total_monthly_income = sum(inc.amount_cents for inc in user.incomes if inc.frequency == 'Monthly')
     total_monthly_income += sum(inc.amount_cents * 4 for inc in user.incomes if inc.frequency == 'Weekly')
-    
+
     total_fixed = sum(exp.amount_cents for exp in user.expenses if exp.is_fixed)
 
     return UserSummary(
-        safe_to_spend_cents=int((total_monthly_income - total_fixed) / 4), # weekly
+        safe_to_spend_cents=weekly_safe_to_spend_cents,
         days_to_next_income=days_to_next,
         total_monthly_income_cents=total_monthly_income,
         total_monthly_fixed_expenses_cents=total_fixed,

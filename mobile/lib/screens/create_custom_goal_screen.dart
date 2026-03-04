@@ -73,7 +73,7 @@ class _CreateCustomGoalScreenState extends State<CreateCustomGoalScreen> {
         targetAmountCents: amountCents,
         priorityWeight:
             1, // Defaulting to high priority for the first custom goal
-          imageUrl: _selectedImageUrl,
+        imageUrl: _selectedImageUrl,
       );
 
       if (!mounted) return;
