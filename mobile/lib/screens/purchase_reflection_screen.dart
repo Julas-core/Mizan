@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 import '../services/api_service.dart';
+import '../services/goal_update_tracker.dart';
 import 'decision_input_screen.dart';
 import 'goals_hub_screen.dart';
 import 'habits_screen.dart';
@@ -123,13 +124,17 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
                       }
 
                       final goal = _goals[index - 1];
-                      final cents = (goal['target_amount_cents'] as num?)?.toInt() ?? 0;
+                      final cents =
+                          (goal['target_amount_cents'] as num?)?.toInt() ?? 0;
                       return ListTile(
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
                         tileColor: Colors.white.withValues(alpha: 0.04),
-                        leading: const Icon(Icons.track_changes, color: Color(0xFF30e8c9)),
+                        leading: const Icon(
+                          Icons.track_changes,
+                          color: Color(0xFF30e8c9),
+                        ),
                         title: Text(
                           '${goal['name'] ?? 'Goal'}',
                           style: const TextStyle(color: Colors.white),
@@ -138,7 +143,8 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
                           'Remaining target: \$${(cents / 100).toStringAsFixed(2)}',
                           style: const TextStyle(color: Colors.white54),
                         ),
-                        onTap: () => Navigator.pop(context, goal['id'] as String?),
+                        onTap: () =>
+                            Navigator.pop(context, goal['id'] as String?),
                       );
                     },
                   ),
@@ -158,9 +164,18 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
     }
 
     String? goalId;
+    Map<String, dynamic>? selectedGoal;
     if (option == 1) {
       goalId = await _selectGoalForBoughtPurchase();
       if (!mounted) return;
+      if (goalId != null && goalId.isNotEmpty) {
+        for (final goal in _goals) {
+          if (goal['id'] == goalId) {
+            selectedGoal = goal;
+            break;
+          }
+        }
+      }
     }
 
     setState(() {
@@ -180,6 +195,26 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
         spentFromGoalId: goalId != null && goalId.isEmpty ? null : goalId,
         idempotencyKey: _statusIdempotencyKey,
       );
+
+      if (selectedGoal != null) {
+        final purchaseAmountCents =
+            (_latestPurchase?['price_cents'] as num?)?.toInt() ?? 0;
+        final previousTargetCents =
+            (selectedGoal['target_amount_cents'] as num?)?.toInt() ?? 0;
+        await GoalUpdateTracker.savePendingUpdate(
+          PendingGoalUpdate(
+            purchaseId: purchaseId,
+            goalId: selectedGoal['id'] as String? ?? '',
+            goalName: selectedGoal['name'] as String? ?? 'Goal',
+            purchaseAmountCents: purchaseAmountCents,
+            previousTargetCents: previousTargetCents,
+            expectedTargetCents: (previousTargetCents - purchaseAmountCents)
+                .clamp(0, previousTargetCents),
+            createdAtIso: DateTime.now().toUtc().toIso8601String(),
+          ),
+        );
+      }
+
       await ApiService.submitReflection(
         purchaseId: purchaseId,
         windowDays: 7,
@@ -193,7 +228,26 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Reflection saved to your timeline.')),
+        SnackBar(
+          content: Text(
+            selectedGoal != null
+                ? 'Reflection saved. Updating ${selectedGoal['name']} in the background.'
+                : 'Reflection saved to your timeline.',
+          ),
+          action: selectedGoal != null
+              ? SnackBarAction(
+                  label: 'Goals',
+                  onPressed: () {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const GoalsHubScreen(),
+                      ),
+                    );
+                  },
+                )
+              : null,
+        ),
       );
       await _loadLatestPurchase();
     } catch (e) {
