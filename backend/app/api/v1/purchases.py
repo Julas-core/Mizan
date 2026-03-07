@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 
 from app.api import dependencies
 from app.models.reflection import Purchase as PurchaseModel, Reflection as ReflectionModel
+from app.models.outbox import OutboxEvent
 from app.schemas.reflection import PurchaseUpdateStatus, Purchase as PurchaseSchema, ReflectionCreate, Reflection as ReflectionSchema
 from app.services.llm_service import generate_reflection_insight
 from app.services.idempotency_service import get_idempotent_payload, persist_idempotent_payload
@@ -75,6 +76,18 @@ def update_purchase_status(
         raise HTTPException(status_code=404, detail="Purchase evaluation not found")
 
     purchase.status = status_update.status
+    db.flush()
+
+    outbox_event = OutboxEvent(
+        event_type="PurchaseStatusUpdated",
+        payload={
+            "purchase_id": purchase.id,
+            "user_id": purchase.user_id,
+            "status": purchase.status,
+            "price_cents": purchase.price_cents
+        }
+    )
+    db.add(outbox_event)
 
     response_payload = {
         "id": purchase.id,
@@ -171,6 +184,18 @@ async def submit_reflection(
     )
     db.add(db_reflection)
     db.flush()
+
+    outbox_event = OutboxEvent(
+        event_type="ReflectionRecorded",
+        payload={
+            "reflection_id": db_reflection.id,
+            "purchase_id": db_reflection.purchase_id,
+            "user_id": db_reflection.user_id,
+            "regret_score": db_reflection.regret_score,
+            "prediction_error_pct": db_reflection.prediction_error_pct
+        }
+    )
+    db.add(outbox_event)
 
     response_payload = ReflectionSchema(
         id=db_reflection.id,

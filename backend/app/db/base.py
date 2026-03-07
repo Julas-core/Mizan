@@ -5,3 +5,4 @@ from app.models.expense import Expense # noqa
 from app.models.goal import Goal # noqa
 from app.models.reflection import Purchase, Reflection # noqa
 from app.models.idempotency import IdempotencyKey # noqa
+from app.models.outbox import OutboxEvent # noqa

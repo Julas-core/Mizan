@@ -6,6 +6,7 @@ from datetime import date
 from app.api import dependencies
 from app.models.user import User as UserModel
 from app.models.reflection import Purchase as PurchaseModel
+from app.models.outbox import OutboxEvent
 
 from app.schemas.decision import PurchaseEvaluateRequest, PurchaseEvaluateResponse
 from app.services.decision_engine import (
@@ -108,6 +109,19 @@ async def evaluate_item(
     )
     db.add(db_purchase)
     db.flush()
+
+    outbox_event = OutboxEvent(
+        event_type="DecisionRecorded",
+        payload={
+            "purchase_id": db_purchase.id,
+            "user_id": user_id,
+            "item_name": db_purchase.item_name,
+            "price_cents": db_purchase.price_cents,
+            "affordability_score": db_purchase.affordability_score,
+            "status": db_purchase.status
+        }
+    )
+    db.add(outbox_event)
 
     # Map the algorithm output format to our REST Response Pydantic Schema
     response_payload = PurchaseEvaluateResponse(

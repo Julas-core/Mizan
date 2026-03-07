@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../services/api_service.dart';
 import 'decision_input_screen.dart';
 import 'decision_analysis_screen.dart';
@@ -17,6 +18,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final _itemController = TextEditingController();
   final _priceController = TextEditingController();
   bool _isLoading = false;
+  String? _currentIdempotencyKey;
   Map<String, dynamic>? _summary;
   Map<String, dynamic>? _aiStatus;
   bool _isSummaryLoading = true;
@@ -70,19 +72,24 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final priceCents = (double.parse(priceStr) * 100).toInt();
 
+    _currentIdempotencyKey ??= const Uuid().v4();
+
     setState(() {
       _isLoading = true;
     });
 
     try {
       final result = await ApiService.evaluatePurchase(
-        _itemController.text,
-        priceCents,
-        'General',
+        itemName: _itemController.text,
+        priceCents: priceCents,
+        category: 'General',
+        idempotencyKey: _currentIdempotencyKey,
       );
 
       if (!mounted) return;
-
+      
+      _currentIdempotencyKey = null; // Clear on success
+      
       Navigator.push(
         context,
         MaterialPageRoute(
