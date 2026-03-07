@@ -89,7 +89,8 @@ class _GoalsHubScreenState extends State<GoalsHubScreen> {
                     )
                   : ListView.separated(
                       itemCount: _goals.length,
-                      separatorBuilder: (_, __) => const SizedBox(height: 12),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final goal = _goals[index];
                         final cents =

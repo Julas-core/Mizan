@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 
 import '../services/api_service.dart';
 import 'decision_analysis_screen.dart';
@@ -18,6 +19,7 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
   final _itemController = TextEditingController();
   final _priceController = TextEditingController();
   bool _isLoading = false;
+  String? _currentIdempotencyKey;
 
   Future<void> _evaluatePurchase() async {
     final item = _itemController.text.trim();
@@ -39,14 +41,17 @@ class _DecisionInputScreenState extends State<DecisionInputScreen> {
     }
 
     final priceCents = (parsed * 100).toInt();
+    _currentIdempotencyKey ??= const Uuid().v4();
 
     setState(() => _isLoading = true);
     try {
       final result = await ApiService.evaluatePurchase(
-        item,
-        priceCents,
-        'General',
+        itemName: item,
+        priceCents: priceCents,
+        category: 'General',
+        idempotencyKey: _currentIdempotencyKey,
       );
+      _currentIdempotencyKey = null;
       if (!mounted) return;
       Navigator.push(
         context,

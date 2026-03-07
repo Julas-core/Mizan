@@ -57,14 +57,19 @@ class _GoalMotivationScreenState extends State<GoalMotivationScreen> {
   }
 
   IconData _getIconForCategory(String? category) {
-    if (category == null) return Icons.shopping_bag;
+    if (category == null) {
+      return Icons.shopping_bag;
+    }
     final lower = category.toLowerCase();
-    if (lower.contains('food') || lower.contains('restaurant'))
+    if (lower.contains('food') || lower.contains('restaurant')) {
       return Icons.restaurant;
-    if (lower.contains('tech') || lower.contains('gadget'))
+    }
+    if (lower.contains('tech') || lower.contains('gadget')) {
       return Icons.computer;
-    if (lower.contains('clothes') || lower.contains('shoes'))
+    }
+    if (lower.contains('clothes') || lower.contains('shoes')) {
       return Icons.checkroom;
+    }
     return Icons.shopping_bag;
   }
 

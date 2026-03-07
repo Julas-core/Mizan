@@ -20,11 +20,15 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
   bool _isLoadingPurchase = true;
   String? _error;
   Map<String, dynamic>? _latestPurchase;
+  List<Map<String, dynamic>> _goals = const [];
+  String? _statusIdempotencyKey;
+  String? _reflectionIdempotencyKey;
 
   @override
   void initState() {
     super.initState();
     _loadLatestPurchase();
+    _loadGoals();
   }
 
   Future<void> _loadLatestPurchase() async {
@@ -44,10 +48,119 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
     }
   }
 
+  Future<void> _loadGoals() async {
+    try {
+      final goals = await ApiService.getGoals();
+      if (!mounted) return;
+      setState(() {
+        _goals = goals;
+      });
+    } catch (_) {
+      // Non-blocking: user can still continue without goal attribution.
+    }
+  }
+
+  Future<String?> _selectGoalForBoughtPurchase() async {
+    if (_goals.isEmpty) {
+      return null;
+    }
+
+    return showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: const Color(0xFF1e293b),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Apply this purchase to a goal?',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Pick a goal if this purchase came out of saved money, or skip to leave goals unchanged.',
+                  style: TextStyle(color: Colors.white70, height: 1.4),
+                ),
+                const SizedBox(height: 16),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: _goals.length + 1,
+                    separatorBuilder: (context, index) =>
+                        const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return ListTile(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          tileColor: Colors.white.withValues(alpha: 0.04),
+                          leading: const Icon(
+                            Icons.do_not_disturb_on_total_silence,
+                            color: Colors.white70,
+                          ),
+                          title: const Text(
+                            'Do not link to a goal',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                          subtitle: const Text(
+                            'Keep goal balances unchanged',
+                            style: TextStyle(color: Colors.white54),
+                          ),
+                          onTap: () => Navigator.pop(context, ''),
+                        );
+                      }
+
+                      final goal = _goals[index - 1];
+                      final cents = (goal['target_amount_cents'] as num?)?.toInt() ?? 0;
+                      return ListTile(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        tileColor: Colors.white.withValues(alpha: 0.04),
+                        leading: const Icon(Icons.track_changes, color: Color(0xFF30e8c9)),
+                        title: Text(
+                          '${goal['name'] ?? 'Goal'}',
+                          style: const TextStyle(color: Colors.white),
+                        ),
+                        subtitle: Text(
+                          'Remaining target: \$${(cents / 100).toStringAsFixed(2)}',
+                          style: const TextStyle(color: Colors.white54),
+                        ),
+                        onTap: () => Navigator.pop(context, goal['id'] as String?),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
   Future<void> _submitReflection(int option) async {
     final purchaseId = _latestPurchase?['id'] as String?;
     if (purchaseId == null || purchaseId.isEmpty || _isSubmitting) {
       return;
+    }
+
+    String? goalId;
+    if (option == 1) {
+      goalId = await _selectGoalForBoughtPurchase();
+      if (!mounted) return;
     }
 
     setState(() {
@@ -58,17 +171,25 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
     try {
       final regretScore = option == 0 ? 5 : 1;
       final status = option == 0 ? 'ABANDONED' : 'BOUGHT';
+      _statusIdempotencyKey ??= const Uuid().v4();
+      _reflectionIdempotencyKey ??= const Uuid().v4();
 
       await ApiService.updatePurchaseStatus(
         purchaseId: purchaseId,
         status: status,
+        spentFromGoalId: goalId != null && goalId.isEmpty ? null : goalId,
+        idempotencyKey: _statusIdempotencyKey,
       );
       await ApiService.submitReflection(
         purchaseId: purchaseId,
         windowDays: 7,
         regretScore: regretScore,
         feltFinancialPressure: option == 0,
+        idempotencyKey: _reflectionIdempotencyKey,
       );
+
+      _statusIdempotencyKey = null;
+      _reflectionIdempotencyKey = null;
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -252,6 +373,14 @@ class _PurchaseReflectionScreenState extends State<PurchaseReflectionScreen> {
               ),
               textAlign: TextAlign.center,
             ),
+            if (_goals.isNotEmpty) ...[
+              const SizedBox(height: 12),
+              const Text(
+                'Tip: if you bought it with savings, you can apply it to one of your goals.',
+                style: TextStyle(fontSize: 12, color: Colors.white54),
+                textAlign: TextAlign.center,
+              ),
+            ],
 
             const SizedBox(height: 40),
 

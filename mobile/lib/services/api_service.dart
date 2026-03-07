@@ -74,6 +74,14 @@ class ApiService {
     return _currentUserId;
   }
 
+  static Map<String, String> _jsonHeaders({String? idempotencyKey}) {
+    final headers = <String, String>{'Content-Type': 'application/json'};
+    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
+      headers['Idempotency-Key'] = idempotencyKey;
+    }
+    return headers;
+  }
+
   static Future<Map<String, dynamic>> getUserSummary() async {
     final userId = _requireUserId();
     final urls = _candidateBaseUrls()
@@ -329,11 +337,12 @@ class ApiService {
     throw Exception('Unable to load insights. Last error: $lastError');
   }
 
-  static Future<Map<String, dynamic>> evaluatePurchase(
-    String itemName,
-    int priceCents,
-    String category,
-  ) async {
+  static Future<Map<String, dynamic>> evaluatePurchase({
+    required String itemName,
+    required int priceCents,
+    required String category,
+    String? idempotencyKey,
+  }) async {
     final userId = _requireUserId();
     final urls = _candidateBaseUrls()
         .map((url) => Uri.parse('$url/decisions/$userId/evaluate'))
@@ -345,7 +354,7 @@ class ApiService {
         final response = await http
             .post(
               url,
-              headers: {'Content-Type': 'application/json'},
+              headers: _jsonHeaders(idempotencyKey: idempotencyKey),
               body: jsonEncode({
                 'item_name': itemName,
                 'price_cents': priceCents,
@@ -398,6 +407,8 @@ class ApiService {
   static Future<Map<String, dynamic>> updatePurchaseStatus({
     required String purchaseId,
     required String status,
+    String? spentFromGoalId,
+    String? idempotencyKey,
   }) async {
     final urls = _candidateBaseUrls()
         .map((url) => Uri.parse('$url/purchases/$purchaseId/status'))
@@ -409,8 +420,11 @@ class ApiService {
         final response = await http
             .patch(
               url,
-              headers: {'Content-Type': 'application/json'},
-              body: jsonEncode({'status': status}),
+              headers: _jsonHeaders(idempotencyKey: idempotencyKey),
+              body: jsonEncode({
+                'status': status,
+                'spent_from_goal_id': spentFromGoalId,
+              }),
             )
             .timeout(const Duration(seconds: 6));
 
@@ -468,6 +482,7 @@ class ApiService {
     required int regretScore,
     bool? feltFinancialPressure,
     double? actualDaysImpacted,
+    String? idempotencyKey,
   }) async {
     final urls = _candidateBaseUrls()
         .map((url) => Uri.parse('$url/purchases/$purchaseId/reflect'))
@@ -479,7 +494,7 @@ class ApiService {
         final response = await http
             .post(
               url,
-              headers: {'Content-Type': 'application/json'},
+              headers: _jsonHeaders(idempotencyKey: idempotencyKey),
               body: jsonEncode({
                 'purchase_id': purchaseId,
                 'window_days': windowDays,
