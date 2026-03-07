@@ -87,9 +87,9 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       if (!mounted) return;
-      
+
       _currentIdempotencyKey = null; // Clear on success
-      
+
       Navigator.push(
         context,
         MaterialPageRoute(

@@ -4,6 +4,7 @@ from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
 
 from app.api import dependencies
+from app.models.goal import Goal as GoalModel
 from app.models.reflection import Purchase as PurchaseModel, Reflection as ReflectionModel
 from app.models.outbox import OutboxEvent
 from app.schemas.reflection import PurchaseUpdateStatus, Purchase as PurchaseSchema, ReflectionCreate, Reflection as ReflectionSchema
@@ -75,19 +76,38 @@ def update_purchase_status(
     if not purchase:
         raise HTTPException(status_code=404, detail="Purchase evaluation not found")
 
+    if status_update.spent_from_goal_id and status_update.status != "BOUGHT":
+        raise HTTPException(status_code=400, detail="A goal can only be linked when status is BOUGHT")
+
+    if status_update.spent_from_goal_id:
+        goal = (
+            db.query(GoalModel)
+            .filter(
+                GoalModel.id == status_update.spent_from_goal_id,
+                GoalModel.user_id == purchase.user_id,
+            )
+            .first()
+        )
+        if not goal:
+            raise HTTPException(status_code=404, detail="Goal not found for this purchase")
+
+    previous_status = purchase.status
     purchase.status = status_update.status
     db.flush()
 
-    outbox_event = OutboxEvent(
-        event_type="PurchaseStatusUpdated",
-        payload={
-            "purchase_id": purchase.id,
-            "user_id": purchase.user_id,
-            "status": purchase.status,
-            "price_cents": purchase.price_cents
-        }
-    )
-    db.add(outbox_event)
+    if previous_status != purchase.status:
+        outbox_event = OutboxEvent(
+            event_type="PurchaseStatusUpdated",
+            payload={
+                "purchase_id": purchase.id,
+                "user_id": purchase.user_id,
+                "status": purchase.status,
+                "previous_status": previous_status,
+                "price_cents": purchase.price_cents,
+                "spent_from_goal_id": status_update.spent_from_goal_id,
+            }
+        )
+        db.add(outbox_event)
 
     response_payload = {
         "id": purchase.id,

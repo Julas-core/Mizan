@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.core.config import settings
 from app.api.v1 import health, users, onboarding, decisions, purchases
-from app.services.scheduler import start_scheduler
+from app.services.scheduler import start_scheduler, stop_scheduler
 
 def get_application() -> FastAPI:
     application = FastAPI(
@@ -22,6 +22,10 @@ def get_application() -> FastAPI:
     @application.on_event("startup")
     async def startup_event():
         start_scheduler()
+
+    @application.on_event("shutdown")
+    async def shutdown_event():
+        stop_scheduler()
 
     application.include_router(
         health.router, 

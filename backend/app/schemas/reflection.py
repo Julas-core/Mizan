@@ -19,6 +19,7 @@ class PurchaseCreate(PurchaseBase):
 
 class PurchaseUpdateStatus(BaseModel):
     status: str  # e.g., "BOUGHT", "ABANDONED"
+    spent_from_goal_id: Optional[str] = None
 
 class Purchase(PurchaseBase):
     id: str

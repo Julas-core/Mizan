@@ -6,6 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.db.session import SessionLocal
 from app.models.reflection import Purchase, Reflection
+from app.services.outbox_worker import process_pending_outbox_events
 
 logger = logging.getLogger(__name__)
 
@@ -58,6 +59,10 @@ scheduler = AsyncIOScheduler()
 
 def start_scheduler():
     """Start the APScheduler background jobs."""
+    if scheduler.running:
+        logger.info("APScheduler already running")
+        return
+
     # Run every day at 12:00 PM UTC
     scheduler.add_job(
         check_pending_reflections,
@@ -73,5 +78,20 @@ def start_scheduler():
         id="demo_initial_check",
         replace_existing=True
     )
+    scheduler.add_job(
+        process_pending_outbox_events,
+        trigger="interval",
+        seconds=15,
+        id="process_pending_outbox_events",
+        replace_existing=True,
+        max_instances=1,
+    )
     scheduler.start()
     logger.info("APScheduler started")
+
+
+def stop_scheduler():
+    """Stop APScheduler background jobs."""
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        logger.info("APScheduler stopped")
