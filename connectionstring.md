@@ -1,0 +1,1 @@
+postgresql://mizan_user:YynYdMWtTC588K7u4zBcEGaRv6LfQLFz@dpg-d6lueqnafjfc738p58s0-a.frankfurt-postgres.render.com/mizan_2atr
