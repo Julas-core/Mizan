@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, Header
+from fastapi import APIRouter, Depends, HTTPException, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from datetime import date
 
 from app.api import dependencies
+from app.api.dependencies import get_current_user, require_same_user
+from app.core.rate_limit import limiter
 from app.models.user import User as UserModel
 from app.models.reflection import Purchase as PurchaseModel
 from app.models.outbox import OutboxEvent
@@ -18,16 +20,20 @@ from app.services.idempotency_service import get_idempotent_payload, persist_ide
 router = APIRouter()
 
 @router.post("/{user_id}/evaluate", response_model=PurchaseEvaluateResponse)
+@limiter.limit("10/minute")
 async def evaluate_item(
+    request_obj: Request,
     user_id: str,
     request: PurchaseEvaluateRequest,
     db: Session = Depends(dependencies.get_db),
+    current_user = Depends(get_current_user),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     """
     Evaluates a potential purchase against the user's financial reality.
     Uses pure mathematical pure functions internally to simulate 30-day cashflow horizons.
     """
+    require_same_user(current_user, user_id)
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

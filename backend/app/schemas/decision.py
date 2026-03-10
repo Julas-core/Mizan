@@ -1,10 +1,10 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict
 
 class PurchaseEvaluateRequest(BaseModel):
-    item_name: str
-    price_cents: int
-    category: str = "General"
+    item_name: str = Field(..., min_length=1, max_length=255)
+    price_cents: int = Field(..., ge=1)
+    category: str = Field("General", max_length=100)
 
 class PurchaseEvaluateResponse(BaseModel):
     purchase_id: str

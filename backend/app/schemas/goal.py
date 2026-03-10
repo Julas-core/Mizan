@@ -1,11 +1,11 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional
 
 class GoalBase(BaseModel):
-    name: str
-    target_amount_cents: int
-    priority: int = 1 # 1 = Highest Priority
-    image_url: Optional[str] = None
+    name: str = Field(..., min_length=1, max_length=255)
+    target_amount_cents: int = Field(..., ge=1)
+    priority: int = Field(1, ge=1, le=10)
+    image_url: Optional[str] = Field(None, max_length=2048)
 
 class GoalCreate(GoalBase):
     pass

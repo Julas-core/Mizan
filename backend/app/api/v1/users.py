@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from datetime import date
 from app.api import dependencies
+from app.api.dependencies import get_current_user, require_same_user
 from app.models.user import User as UserModel
 from app.schemas.user import User as UserSchema, UserCreate, UserSummary
 from app.services.decision_engine import (
@@ -29,20 +30,22 @@ def create_user(user_in: UserCreate, db: Session = Depends(dependencies.get_db))
     )
 
 @router.get("/{user_id}", response_model=UserSchema)
-def get_user(user_id: str, db: Session = Depends(dependencies.get_db)):
+def get_user(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Get a user by ID.
     """
+    require_same_user(current_user, user_id)
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 @router.get("/{user_id}/summary", response_model=UserSummary)
-def get_user_summary(user_id: str, db: Session = Depends(dependencies.get_db)):
+def get_user_summary(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Get a calculated financial summary for the user.
     """
+    require_same_user(current_user, user_id)
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="User not found")

@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Header
+from fastapi import APIRouter, Depends, HTTPException, status, Header, Request
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from datetime import datetime, timezone
 
 from app.api import dependencies
+from app.api.dependencies import get_current_user, require_same_user
+from app.core.rate_limit import limiter
 from app.models.goal import Goal as GoalModel
 from app.models.reflection import Purchase as PurchaseModel, Reflection as ReflectionModel
 from app.models.outbox import OutboxEvent
@@ -15,10 +17,11 @@ from typing import List
 router = APIRouter()
 
 @router.get("/{user_id}/history", response_model=List[PurchaseSchema])
-def get_user_purchase_history(user_id: str, status_filter: str = "ABANDONED", db: Session = Depends(dependencies.get_db)):
+def get_user_purchase_history(user_id: str, status_filter: str = "ABANDONED", db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Returns a list of purchases with a specific status (defaults to ABANDONED for 'Passed' items).
     """
+    require_same_user(current_user, user_id)
     purchases = (
         db.query(PurchaseModel)
         .filter(
@@ -32,10 +35,11 @@ def get_user_purchase_history(user_id: str, status_filter: str = "ABANDONED", db
     return purchases
 
 @router.get("/{user_id}/latest-evaluated", response_model=PurchaseSchema)
-def get_latest_evaluated_purchase(user_id: str, db: Session = Depends(dependencies.get_db)):
+def get_latest_evaluated_purchase(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Returns the latest purchase currently awaiting user reflection.
     """
+    require_same_user(current_user, user_id)
     purchase = (
         db.query(PurchaseModel)
         .filter(
@@ -56,6 +60,7 @@ def update_purchase_status(
     purchase_id: str,
     status_update: PurchaseUpdateStatus,
     db: Session = Depends(dependencies.get_db),
+    current_user = Depends(get_current_user),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     """
@@ -149,10 +154,13 @@ def update_purchase_status(
 
 
 @router.post("/{purchase_id}/reflect", response_model=ReflectionSchema, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 async def submit_reflection(
+    request_obj: Request,
     purchase_id: str,
     reflection_in: ReflectionCreate,
     db: Session = Depends(dependencies.get_db),
+    current_user = Depends(get_current_user),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
 ):
     """

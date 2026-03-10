@@ -1,16 +1,26 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy import text
 from app.core.config import settings
 from app.services.llm_service import GEMINI_MODEL
+from app.api import dependencies
 
 router = APIRouter()
 
 @router.get("/health", response_model=dict)
-def health_check():
+def health_check(db: Session = Depends(dependencies.get_db)):
     """
-    Minimal health check endpoint to verify the API is running.
+    Health check endpoint verifying API and Database status.
     """
+    db_status = "ok"
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception:
+        db_status = "error"
+
     return {
         "status": "ok",
+        "database": db_status,
         "project": settings.PROJECT_NAME,
         "version": settings.VERSION
     }

@@ -3,6 +3,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from app.api import dependencies
+from app.api.dependencies import get_current_user, require_same_user
 from app.models.user import User as UserModel
 from app.models.income import Income as IncomeModel
 from app.models.expense import Expense as ExpenseModel
@@ -21,10 +22,11 @@ def get_user_or_404(db: Session, user_id: str) -> UserModel:
     return user
 
 @router.post("/{user_id}/income", response_model=IncomeSchema, status_code=status.HTTP_201_CREATED)
-def setup_income(user_id: str, income_in: IncomeCreate, db: Session = Depends(dependencies.get_db)):
+def setup_income(user_id: str, income_in: IncomeCreate, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Setup income details for a user.
     """
+    require_same_user(current_user, user_id)
     get_user_or_404(db, user_id)
     db_income = IncomeModel(
         user_id=user_id,
@@ -39,10 +41,11 @@ def setup_income(user_id: str, income_in: IncomeCreate, db: Session = Depends(de
     return db_income
 
 @router.post("/{user_id}/expenses", response_model=ExpenseSchema, status_code=status.HTTP_201_CREATED)
-def add_fixed_expense(user_id: str, expense_in: ExpenseCreate, db: Session = Depends(dependencies.get_db)):
+def add_fixed_expense(user_id: str, expense_in: ExpenseCreate, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Add a fixed expense for a user.
     """
+    require_same_user(current_user, user_id)
     get_user_or_404(db, user_id)
     db_expense = ExpenseModel(
         user_id=user_id,
@@ -57,10 +60,11 @@ def add_fixed_expense(user_id: str, expense_in: ExpenseCreate, db: Session = Dep
     return db_expense
 
 @router.post("/{user_id}/goal", response_model=GoalSchema, status_code=status.HTTP_201_CREATED)
-def set_savings_goal(user_id: str, goal_in: GoalCreate, db: Session = Depends(dependencies.get_db)):
+def set_savings_goal(user_id: str, goal_in: GoalCreate, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     Set a custom savings goal for a user.
     """
+    require_same_user(current_user, user_id)
     get_user_or_404(db, user_id)
     db_goal = GoalModel(
         user_id=user_id,
@@ -76,10 +80,11 @@ def set_savings_goal(user_id: str, goal_in: GoalCreate, db: Session = Depends(de
 
 
 @router.get("/{user_id}/goals", response_model=List[GoalSchema])
-def list_savings_goals(user_id: str, db: Session = Depends(dependencies.get_db)):
+def list_savings_goals(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
     List all savings goals for a user.
     """
+    require_same_user(current_user, user_id)
     get_user_or_404(db, user_id)
     return (
         db.query(GoalModel)

@@ -15,6 +15,10 @@ logger = logging.getLogger(__name__)
 # --- Model Configuration ---
 GEMINI_MODEL = "gemini-1.5-flash"
 
+# Configure Gemini once at module level
+if settings.GEMINI_API_KEY:
+    genai.configure(api_key=settings.GEMINI_API_KEY)
+
 def _build_prompt(
     item_name: str,
     item_price_cents: int,
@@ -90,7 +94,6 @@ async def generate_insight(
     upcoming_expenses_context = upcoming_expenses_context or []
 
     try:
-        genai.configure(api_key=settings.GEMINI_API_KEY)
         model = genai.GenerativeModel(GEMINI_MODEL)
 
         prompt = _build_prompt(
@@ -153,7 +156,6 @@ async def generate_reflection_insight(purchase: "PurchaseModel", reflection: "Re
         return "Reflection recorded. Tracking your actual outcomes helps build better financial habits over time."
 
     try:
-        genai.configure(api_key=settings.GEMINI_API_KEY)
         model = genai.GenerativeModel(GEMINI_MODEL)
         prompt = _build_reflection_prompt(purchase, reflection, error_pct)
         response = await model.generate_content_async(prompt)
