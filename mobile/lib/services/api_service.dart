@@ -12,7 +12,7 @@ class ApiService {
   static const String baseUrl = 'http://127.0.0.1:8000/api/v1';
   static const String emulatorBaseUrl = 'http://10.0.2.2:8000/api/v1';
   static const String _defaultPhysicalDeviceBaseUrl =
-      'http://192.168.1.13:8000/api/v1';
+      'https://mizan-backend.onrender.com/api/v1';
   static const String physicalDeviceBaseUrl = String.fromEnvironment(
     'API_BASE_URL',
     defaultValue: _defaultPhysicalDeviceBaseUrl,
@@ -94,7 +94,7 @@ class ApiService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
@@ -126,7 +126,7 @@ class ApiService {
               headers: {'Content-Type': 'application/json'},
               body: jsonEncode({'time_to_savings_goal_days': null}),
             )
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           final decoded = jsonDecode(response.body) as Map<String, dynamic>;
@@ -179,7 +179,7 @@ class ApiService {
                 'confidence_score': confidenceScore,
               }),
             )
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           return;
@@ -223,7 +223,7 @@ class ApiService {
                 'due_date_day': dueDateDay,
               }),
             )
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           return;
@@ -267,7 +267,7 @@ class ApiService {
                 'image_url': imageUrl,
               }),
             )
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 201 || response.statusCode == 200) {
           return;
@@ -295,7 +295,7 @@ class ApiService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
         if (response.statusCode == 200) {
           final decoded = jsonDecode(response.body) as List<dynamic>;
           return decoded.cast<Map<String, dynamic>>();
@@ -322,7 +322,7 @@ class ApiService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         }
@@ -389,7 +389,7 @@ class ApiService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         }
@@ -426,7 +426,7 @@ class ApiService {
                 'spent_from_goal_id': spentFromGoalId,
               }),
             )
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
@@ -458,7 +458,7 @@ class ApiService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
 
         if (response.statusCode == 200) {
           final List<dynamic> decoded = jsonDecode(response.body);
@@ -530,7 +530,7 @@ class ApiService {
       try {
         final response = await http
             .get(url)
-            .timeout(const Duration(seconds: 6));
+            .timeout(const Duration(seconds: 60));
         if (response.statusCode == 200) {
           return jsonDecode(response.body) as Map<String, dynamic>;
         }
