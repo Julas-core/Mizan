@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 from datetime import datetime
 
@@ -22,6 +22,8 @@ class PurchaseUpdateStatus(BaseModel):
     spent_from_goal_id: Optional[str] = None
 
 class Purchase(PurchaseBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
     affordability_score: int
@@ -31,9 +33,6 @@ class Purchase(PurchaseBase):
     ai_insight: Optional[str] = None
     status: str
     created_at: datetime
-
-    class Config:
-        orm_mode = True
 
 # --- Reflection Schemas ---
 
@@ -49,6 +48,8 @@ class ReflectionCreate(ReflectionBase):
     reflection_text: Optional[str] = None
 
 class Reflection(ReflectionBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     purchase_id: str
     user_id: str
@@ -58,6 +59,3 @@ class Reflection(ReflectionBase):
     actual_days_impacted: Optional[float] = None
     prediction_error_pct: Optional[float] = None
     reflection_text: Optional[str] = None
-
-    class Config:
-        orm_mode = True

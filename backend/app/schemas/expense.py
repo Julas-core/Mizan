@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import Optional
 
 class ExpenseBase(BaseModel):
@@ -11,8 +11,7 @@ class ExpenseCreate(ExpenseBase):
     pass
 
 class Expense(ExpenseBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
-
-    class Config:
-        orm_mode = True

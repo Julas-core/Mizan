@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 from datetime import datetime
 from app.schemas.income import Income
@@ -12,6 +12,8 @@ class UserCreate(UserBase):
     pass
 
 class User(UserBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     created_at: datetime
     incomes: List[Income] = []

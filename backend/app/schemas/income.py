@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from datetime import date
 
 class IncomeBase(BaseModel):
@@ -11,8 +11,7 @@ class IncomeCreate(IncomeBase):
     pass
 
 class Income(IncomeBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: str
     user_id: str
-
-    class Config:
-        orm_mode = True
