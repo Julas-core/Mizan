@@ -19,7 +19,14 @@ def create_user(user_in: UserCreate, db: Session = Depends(dependencies.get_db))
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return db_user
+    return UserSchema(
+        id=db_user.id,
+        created_at=db_user.created_at,
+        time_to_savings_goal_days=db_user.time_to_savings_goal_days,
+        incomes=[],
+        expenses=[],
+        goals=[],
+    )
 
 @router.get("/{user_id}", response_model=UserSchema)
 def get_user(user_id: str, db: Session = Depends(dependencies.get_db)):
