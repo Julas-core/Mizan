@@ -80,7 +80,13 @@ def set_savings_goal(user_id: str, goal_in: GoalCreate, db: Session = Depends(de
 
 
 @router.get("/{user_id}/goals", response_model=List[GoalSchema])
-def list_savings_goals(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
+def list_savings_goals(
+    user_id: str, 
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(dependencies.get_db), 
+    current_user = Depends(get_current_user)
+):
     """
     List all savings goals for a user.
     """
@@ -90,5 +96,7 @@ def list_savings_goals(user_id: str, db: Session = Depends(dependencies.get_db),
         db.query(GoalModel)
         .filter(GoalModel.user_id == user_id)
         .order_by(GoalModel.priority.asc())
+        .offset(skip)
+        .limit(limit)
         .all()
     )

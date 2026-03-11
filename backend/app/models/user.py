@@ -9,6 +9,7 @@ class User(Base):
     id = Column(String, primary_key=True, default=generate_uuid, index=True)
     email = Column(String, unique=True, index=True, nullable=True)
     hashed_password = Column(String, nullable=True)
+    current_balance_cents = Column(Integer, default=0, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     time_to_savings_goal_days = Column(Integer, nullable=True) # Optional goal timeline
 

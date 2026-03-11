@@ -22,9 +22,9 @@ router = APIRouter()
 @router.post("/{user_id}/evaluate", response_model=PurchaseEvaluateResponse)
 @limiter.limit("10/minute")
 async def evaluate_item(
-    request_obj: Request,
+    request: Request,
     user_id: str,
-    request: PurchaseEvaluateRequest,
+    payload: PurchaseEvaluateRequest,
     db: Session = Depends(dependencies.get_db),
     current_user = Depends(get_current_user),
     idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
@@ -76,7 +76,7 @@ async def evaluate_item(
     
     # Run the core algorithmic math evaluation
     evaluation = evaluate_purchase(
-        item_price_cents=request.price_cents,
+        item_price_cents=payload.price_cents,
         starting_cash_cents=starting_cash_cents,
         incomes=engine_incomes,
         expenses=engine_expenses,
@@ -93,8 +93,8 @@ async def evaluate_item(
 
     # Generate human-readable AI insight from Gemini
     insight = await generate_insight(
-        item_name=request.item_name,
-        item_price_cents=request.price_cents,
+        item_name=payload.item_name,
+        item_price_cents=payload.price_cents,
         result=evaluation,
         user_goals_context=goals_context,
         upcoming_expenses_context=expenses_context
@@ -103,9 +103,9 @@ async def evaluate_item(
     # Save to the Database (Phase 4: Reflection Learning setup)
     db_purchase = PurchaseModel(
         user_id=user_id,
-        item_name=request.item_name,
-        price_cents=request.price_cents,
-        category=request.category,
+        item_name=payload.item_name,
+        price_cents=payload.price_cents,
+        category=payload.category,
         affordability_score=evaluation.affordability_score,
         risk_level=evaluation.risk_level,
         days_impacted_predicted=evaluation.days_impacted,

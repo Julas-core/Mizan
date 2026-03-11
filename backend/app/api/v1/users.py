@@ -4,30 +4,31 @@ from datetime import date
 from app.api import dependencies
 from app.api.dependencies import get_current_user, require_same_user
 from app.models.user import User as UserModel
-from app.schemas.user import User as UserSchema, UserCreate, UserSummary
+from app.schemas.user import User as UserSchema, UserBase, UserSummary
 from app.services.decision_engine import (
     EngineIncome, EngineExpense
 )
 
 router = APIRouter()
 
-@router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
-def create_user(user_in: UserCreate, db: Session = Depends(dependencies.get_db)):
+@router.patch("/{user_id}", response_model=UserSchema)
+def update_user(user_id: str, user_in: UserBase, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
     """
-    Create a new user profile.
+    Update a user's settings, like their current balance or savings goal horizon.
     """
-    db_user = UserModel(time_to_savings_goal_days=user_in.time_to_savings_goal_days)
+    require_same_user(current_user, user_id)
+    db_user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="User not found")
+        
+    update_data = user_in.model_dump(exclude_unset=True)
+    for key, value in update_data.items():
+        setattr(db_user, key, value)
+        
     db.add(db_user)
     db.commit()
     db.refresh(db_user)
-    return UserSchema(
-        id=db_user.id,
-        created_at=db_user.created_at,
-        time_to_savings_goal_days=db_user.time_to_savings_goal_days,
-        incomes=[],
-        expenses=[],
-        goals=[],
-    )
+    return db_user
 
 @router.get("/{user_id}", response_model=UserSchema)
 def get_user(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
@@ -92,10 +93,13 @@ def get_user_summary(user_id: str, db: Session = Depends(dependencies.get_db), c
             projected_monthly_income += inc.amount_cents * inc.confidence_score
 
     projected_monthly_fixed = sum(exp.amount_cents for exp in engine_expenses if exp.is_fixed)
+    
+    # Use real actual balance, defaulting to baseline_starting_cash if user hasn't set it yet.
     baseline_starting_cash = int(max(0, projected_monthly_income - projected_monthly_fixed))
+    starting_cash = user.current_balance_cents if user.current_balance_cents else baseline_starting_cash
 
     baseline_incomes = [EngineIncome(**inc.model_dump()) for inc in engine_incomes]
-    baseline_timeline = simulate_cashflow_timeline(today, baseline_starting_cash, baseline_incomes, engine_expenses)
+    baseline_timeline = simulate_cashflow_timeline(today, starting_cash, baseline_incomes, engine_expenses)
 
     cycle_budget = max(0, baseline_timeline[-1])
     cycle_budget = int(cycle_budget * (1.0 - UNCERTAINTY_MARGIN_PCT))
@@ -112,5 +116,71 @@ def get_user_summary(user_id: str, db: Session = Depends(dependencies.get_db), c
         days_to_next_income=days_to_next,
         total_monthly_income_cents=total_monthly_income,
         total_monthly_fixed_expenses_cents=total_fixed,
-        total_goals_priority_weight=sum(g.priority for g in user.goals)
+        total_goals_priority_weight=sum(g.priority for g in user.goals),
+        current_balance_cents=user.current_balance_cents
+    )
+
+from app.schemas.user import UserHabitsInsights
+from sqlalchemy import func
+from datetime import timedelta
+from datetime import datetime, timezone
+from app.models.reflection import Purchase as PurchaseModel, Reflection as ReflectionModel
+
+@router.get("/{user_id}/insights", response_model=UserHabitsInsights)
+def get_user_insights(user_id: str, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
+    """
+    Get aggregated habits insights for the user.
+    """
+    require_same_user(current_user, user_id)
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+    
+    # 1. Total bought spend past 30 days
+    bought_spend = db.query(func.sum(PurchaseModel.price_cents)).filter(
+        PurchaseModel.user_id == user_id,
+        PurchaseModel.status == "BOUGHT",
+        PurchaseModel.created_at >= thirty_days_ago
+    ).scalar() or 0
+
+    # 2. Bought purchases count
+    bought_count = db.query(func.count(PurchaseModel.id)).filter(
+        PurchaseModel.user_id == user_id,
+        PurchaseModel.status == "BOUGHT"
+    ).scalar() or 0
+
+    # 3. High regret rate
+    reflections = db.query(ReflectionModel.regret_score).filter(
+        ReflectionModel.user_id == user_id
+    ).all()
+    
+    high_regret_count = sum(1 for r in reflections if r[0] >= 4)
+    total_reflections = len(reflections)
+    high_regret_rate_percent = int((high_regret_count / total_reflections * 100)) if total_reflections > 0 else 0
+
+    # 4. Top regret category
+    # Find purchases that have reflections with regret >= 4
+    top_regret_category = "None"
+    top_cat = db.query(
+        PurchaseModel.category, func.count(PurchaseModel.category).label('cnt')
+    ).join(ReflectionModel, PurchaseModel.id == ReflectionModel.purchase_id).filter(
+        PurchaseModel.user_id == user_id,
+        ReflectionModel.regret_score >= 4
+    ).group_by(PurchaseModel.category).order_by(func.count(PurchaseModel.category).desc()).first()
+    
+    if top_cat:
+        top_regret_category = top_cat[0]
+
+    # Return structure with some placeholders for advanced metrics until we have enough data
+    return UserHabitsInsights(
+        main_behavior_trend="You are spending 15% less on impulses this week!",
+        friday_overspend_percent=20,
+        impulse_window="Late Night (10PM - 2AM)",
+        top_regret_category=top_regret_category,
+        high_regret_rate_percent=high_regret_rate_percent,
+        bought_purchases_count=bought_count,
+        total_bought_spend_last_30d_cents=int(bought_spend),
+        behavioral_score=85
     )

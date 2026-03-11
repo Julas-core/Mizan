@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime, timezone
-from sqlalchemy import Column, String, DateTime, Enum, JSON
+from sqlalchemy import Column, String, DateTime, Enum, JSON, Integer
 from app.db.base_class import Base
 import enum
 
@@ -18,3 +18,5 @@ class OutboxEvent(Base):
     status = Column(Enum(EventStatus), default=EventStatus.PENDING, index=True, nullable=False)
     created_at = Column(DateTime(timezone=True), default=lambda: datetime.now(timezone.utc), nullable=False)
     processed_at = Column(DateTime(timezone=True), nullable=True)
+    retries = Column(Integer, default=0, nullable=False)
+    next_retry_at = Column(DateTime(timezone=True), nullable=True)

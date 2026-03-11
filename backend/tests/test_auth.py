@@ -64,7 +64,7 @@ def test_duplicate_email_registration():
         json={"email": "dup@example.com", "password": "password456"}
     )
     assert response.status_code == 409
-    assert response.json()["detail"] == "Email already registered"
+    assert response.json()["error"] == "Email already registered"
 
 
 def test_no_token_returns_401():

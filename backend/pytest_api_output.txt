@@ -1,0 +1,276 @@
+============================= test session starts =============================
+platform win32 -- Python 3.13.12, pytest-8.1.1, pluggy-1.6.0 -- D:\Projects\Mizan\backend\.venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projects\Mizan\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-0.23.5
+asyncio: mode=Mode.STRICT
+collecting ... collected 6 items
+
+tests/test_api_v1.py::test_get_user_summary PASSED                       [ 16%]
+tests/test_api_v1.py::test_patch_user_balance PASSED                     [ 33%]
+tests/test_api_v1.py::test_get_user_insights FAILED                      [ 50%]
+tests/test_api_v1.py::test_goals_pagination FAILED                       [ 66%]
+tests/test_api_v1.py::test_history_pagination FAILED                     [ 83%]
+tests/test_api_v1.py::test_evaluate_requires_auth PASSED                 [100%]
+
+================================== FAILURES ===================================
+___________________________ test_get_user_insights ____________________________
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2118: in _exec_insertmany_context
+    dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:941: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: purchases.affordability_score
+
+The above exception was the direct cause of the following exception:
+tests\test_api_v1.py:86: in test_get_user_insights
+    db.commit()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2028: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1313: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1288: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4352: in flush
+    self._flush(objects)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4487: in _flush
+    with util.safe_reraise():
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4448: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1143: in _emit_insert_statements
+    result = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1418: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:515: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1640: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1844: in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2126: in _exec_insertmany_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2118: in _exec_insertmany_context
+    dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:941: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: purchases.affordability_score
+E   [SQL: INSERT INTO purchases (id, user_id, item_name, price_cents, category, affordability_score, risk_level, days_impacted_predicted, liquidity_failure, ai_insight, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at, id]
+E   [parameters: ('0307b003-1b54-4772-97d0-17837cb351e0', '8faf7300-cf32-4910-9399-cda9be9a15d3', 'Coffee', 500, 'Food', None, None, None, 0, None, 'BOUGHT', '358e50b4-77f9-46f0-baab-d9d73b0cf5cf', '8faf7300-cf32-4910-9399-cda9be9a15d3', 'Phone', 80000, 'Tech', None, None, None, 0, None, 'ABANDONED')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+____________________________ test_goals_pagination ____________________________
+tests\test_api_v1.py:110: in test_goals_pagination
+    response = client.get(
+.venv\Lib\site-packages\starlette\testclient.py:523: in get
+    return super().get(
+.venv\Lib\site-packages\httpx\_client.py:1054: in get
+    return self.request(
+.venv\Lib\site-packages\starlette\testclient.py:491: in request
+    return super().request(
+.venv\Lib\site-packages\httpx\_client.py:827: in request
+    return self.send(request, auth=auth, follow_redirects=follow_redirects)
+.venv\Lib\site-packages\httpx\_client.py:914: in send
+    response = self._send_handling_auth(
+.venv\Lib\site-packages\httpx\_client.py:942: in _send_handling_auth
+    response = self._send_handling_redirects(
+.venv\Lib\site-packages\httpx\_client.py:979: in _send_handling_redirects
+    response = self._send_single_request(request)
+.venv\Lib\site-packages\httpx\_client.py:1015: in _send_single_request
+    response = transport.handle_request(request)
+.venv\Lib\site-packages\starlette\testclient.py:372: in handle_request
+    raise exc
+.venv\Lib\site-packages\starlette\testclient.py:369: in handle_request
+    portal.call(self.app, scope, receive, send)
+.venv\Lib\site-packages\anyio\from_thread.py:334: in call
+    return cast(T_Retval, self.start_task_soon(func, *args).result())
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\_base.py:456: in result
+    return self.__get_result()
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python313\Lib\concurrent\futures\_base.py:401: in __get_result
+    raise self._exception
+.venv\Lib\site-packages\anyio\from_thread.py:259: in _call_func
+    retval = await retval_or_awaitable
+.venv\Lib\site-packages\fastapi\applications.py:1054: in __call__
+    await super().__call__(scope, receive, send)
+.venv\Lib\site-packages\starlette\applications.py:123: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\errors.py:186: in __call__
+    raise exc
+.venv\Lib\site-packages\starlette\middleware\errors.py:164: in __call__
+    await self.app(scope, receive, _send)
+.venv\Lib\site-packages\starlette\middleware\cors.py:83: in __call__
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\middleware\exceptions.py:62: in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+.venv\Lib\site-packages\starlette\_exception_handler.py:64: in wrapped_app
+    raise exc
+.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+.venv\Lib\site-packages\starlette\routing.py:758: in __call__
+    await self.middleware_stack(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:778: in app
+    await route.handle(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:299: in handle
+    await self.app(scope, receive, send)
+.venv\Lib\site-packages\starlette\routing.py:79: in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+.venv\Lib\site-packages\starlette\_exception_handler.py:64: in wrapped_app
+    raise exc
+.venv\Lib\site-packages\starlette\_exception_handler.py:53: in wrapped_app
+    await app(scope, receive, sender)
+.venv\Lib\site-packages\starlette\routing.py:74: in app
+    response = await func(request)
+.venv\Lib\site-packages\fastapi\routing.py:296: in app
+    content = await serialize_response(
+.venv\Lib\site-packages\fastapi\routing.py:155: in serialize_response
+    raise ResponseValidationError(
+E   fastapi.exceptions.ResponseValidationError: 1 validation errors:
+E     {'type': 'greater_than_equal', 'loc': ('response', 0, 'priority'), 'msg': 'Input should be greater than or equal to 1', 'input': 0, 'ctx': {'ge': 1}, 'url': 'https://errors.pydantic.dev/2.12/v/greater_than_equal'}
+------------------------------ Captured log call ------------------------------
+ERROR    app.api.errors:errors.py:12 Unhandled error processing request: GET /api/v1/onboarding/6b4f55d3-92b4-4572-8e83-4c66b3bcb5e5/goals
+Traceback (most recent call last):
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\middleware\errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\middleware\cors.py", line 83, in __call__
+    await self.app(scope, receive, send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\middleware\exceptions.py", line 62, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\routing.py", line 758, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\routing.py", line 778, in app
+    await route.handle(scope, receive, send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\routing.py", line 299, in handle
+    await self.app(scope, receive, send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\routing.py", line 79, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 64, in wrapped_app
+    raise exc
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\_exception_handler.py", line 53, in wrapped_app
+    await app(scope, receive, sender)
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\starlette\routing.py", line 74, in app
+    response = await func(request)
+               ^^^^^^^^^^^^^^^^^^^
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\fastapi\routing.py", line 296, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<9 lines>...
+    )
+    ^
+  File "D:\Projects\Mizan\backend\.venv\Lib\site-packages\fastapi\routing.py", line 155, in serialize_response
+    raise ResponseValidationError(
+        errors=_normalize_errors(errors), body=response_content
+    )
+fastapi.exceptions.ResponseValidationError: 1 validation errors:
+  {'type': 'greater_than_equal', 'loc': ('response', 0, 'priority'), 'msg': 'Input should be greater than or equal to 1', 'input': 0, 'ctx': {'ge': 1}, 'url': 'https://errors.pydantic.dev/2.12/v/greater_than_equal'}
+___________________________ test_history_pagination ___________________________
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2118: in _exec_insertmany_context
+    dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:941: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: purchases.affordability_score
+
+The above exception was the direct cause of the following exception:
+tests\test_api_v1.py:137: in test_history_pagination
+    db.commit()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:2028: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1313: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+.venv\Lib\site-packages\sqlalchemy\orm\state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:1288: in _prepare_impl
+    self.session.flush()
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4352: in flush
+    self._flush(objects)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4487: in _flush
+    with util.safe_reraise():
+.venv\Lib\site-packages\sqlalchemy\util\langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+.venv\Lib\site-packages\sqlalchemy\orm\session.py:4448: in _flush
+    flush_context.execute()
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+.venv\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+.venv\Lib\site-packages\sqlalchemy\orm\persistence.py:1143: in _emit_insert_statements
+    result = connection.execute(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1418: in execute
+    return meth(
+.venv\Lib\site-packages\sqlalchemy\sql\elements.py:515: in _execute_on_connection
+    return connection._execute_clauseelement(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1640: in _execute_clauseelement
+    ret = self._execute_context(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:1844: in _execute_context
+    return self._exec_insertmany_context(dialect, context)
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2126: in _exec_insertmany_context
+    self._handle_dbapi_exception(
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2355: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+.venv\Lib\site-packages\sqlalchemy\engine\base.py:2118: in _exec_insertmany_context
+    dialect.do_execute(
+.venv\Lib\site-packages\sqlalchemy\engine\default.py:941: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: purchases.affordability_score
+E   [SQL: INSERT INTO purchases (id, user_id, item_name, price_cents, category, affordability_score, risk_level, days_impacted_predicted, liquidity_failure, ai_insight, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?), (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING created_at, id]
+E   [parameters: ('71205384-6693-4063-ac03-29020adc6d86', '00e77075-c7c9-4076-a9bd-41a3191cc99f', 'Item 0', 100, 'Misc', None, None, None, 0, None, 'ABANDONED', '20a384e2-1bb4-4441-8064-04064b5b5a22', '00e77075-c7c9-4076-a9bd-41a3191cc99f', 'Item 1', 100, 'Misc', None, None, None, 0, None, 'ABANDONED', '86263018-1173-453f-a4c0-2e27bc3c0f3f', '00e77075-c7c9-4076-a9bd-41a3191cc99f', 'Item 2', 100, 'Misc', None, None, None, 0, None, 'ABANDONED', 'cc0ead48-4909-4bce-81c0-0850c1b26420', '00e77075-c7c9-4076-a9bd-41a3191cc99f', 'Item 3', 100, 'Misc', None, None, None, 0, None, 'ABANDONED', 'f171437d-413c-449e-a3eb-d08b837fbaf7', '00e77075-c7c9-4076-a9bd-41a3191cc99f', 'Item 4', 100, 'Misc', None, None, None, 0, None, 'ABANDONED')]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+============================== warnings summary ===============================
+app\core\config.py:4
+  D:\Projects\Mizan\backend\app\core\config.py:4: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.MessageMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+<frozen importlib._bootstrap>:488
+  <frozen importlib._bootstrap>:488: DeprecationWarning: Type google._upb._message.ScalarMapContainer uses PyType_Spec with a metaclass that has custom tp_new. This is deprecated and will no longer be allowed in Python 3.14.
+
+app\services\llm_service.py:8
+  D:\Projects\Mizan\backend\app\services\llm_service.py:8: FutureWarning: 
+  
+  All support for the `google.generativeai` package has ended. It will no longer be receiving 
+  updates or bug fixes. Please switch to the `google.genai` package as soon as possible.
+  See README for more details:
+  
+  https://github.com/google-gemini/deprecated-generative-ai-python/blob/main/README.md
+  
+    import google.generativeai as genai
+
+.venv\Lib\site-packages\httpx\_client.py:680
+  D:\Projects\Mizan\backend\.venv\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_api_v1.py::test_get_user_insights - sqlalchemy.exc.Integrit...
+FAILED tests/test_api_v1.py::test_goals_pagination - fastapi.exceptions.Respo...
+FAILED tests/test_api_v1.py::test_history_pagination - sqlalchemy.exc.Integri...
+================== 3 failed, 3 passed, 5 warnings in 10.73s ===================

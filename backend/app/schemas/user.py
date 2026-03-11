@@ -7,6 +7,7 @@ from app.schemas.goal import Goal
 
 class UserBase(BaseModel):
     time_to_savings_goal_days: Optional[int] = None
+    current_balance_cents: Optional[int] = 0
 
 class UserCreate(UserBase):
     pass
@@ -19,6 +20,7 @@ class User(UserBase):
     incomes: List[Income] = []
     expenses: List[Expense] = []
     goals: List[Goal] = []
+    current_balance_cents: int = 0
 
 class UserSummary(BaseModel):
     safe_to_spend_cents: int
@@ -26,6 +28,7 @@ class UserSummary(BaseModel):
     total_monthly_income_cents: int
     total_monthly_fixed_expenses_cents: int
     total_goals_priority_weight: int
+    current_balance_cents: int
 
 
 class UserHabitsInsights(BaseModel):

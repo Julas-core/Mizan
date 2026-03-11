@@ -6,7 +6,7 @@ from datetime import datetime, timedelta, timezone
 
 from app.db.session import SessionLocal
 from app.models.reflection import Purchase, Reflection
-from app.services.outbox_worker import process_pending_outbox_events
+from app.services.outbox_worker import process_pending_outbox_events, cleanup_processed_events
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +85,13 @@ def start_scheduler():
         id="process_pending_outbox_events",
         replace_existing=True,
         max_instances=1,
+    )
+    # Cleanup processed outbox events daily at 3:00 AM UTC
+    scheduler.add_job(
+        cleanup_processed_events,
+        trigger=CronTrigger(hour=3, minute=0),
+        id="cleanup_processed_outbox_events",
+        replace_existing=True,
     )
     scheduler.start()
     logger.info("APScheduler started")

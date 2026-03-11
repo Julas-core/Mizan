@@ -17,7 +17,14 @@ from typing import List
 router = APIRouter()
 
 @router.get("/{user_id}/history", response_model=List[PurchaseSchema])
-def get_user_purchase_history(user_id: str, status_filter: str = "ABANDONED", db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):
+def get_user_purchase_history(
+    user_id: str, 
+    status_filter: str = "ABANDONED", 
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(dependencies.get_db), 
+    current_user = Depends(get_current_user)
+):
     """
     Returns a list of purchases with a specific status (defaults to ABANDONED for 'Passed' items).
     """
@@ -29,7 +36,8 @@ def get_user_purchase_history(user_id: str, status_filter: str = "ABANDONED", db
             PurchaseModel.status == status_filter
         )
         .order_by(PurchaseModel.created_at.desc())
-        .limit(20) # Keeping it to recent history for now
+        .offset(skip)
+        .limit(limit)
         .all()
     )
     return purchases
@@ -156,7 +164,7 @@ def update_purchase_status(
 @router.post("/{purchase_id}/reflect", response_model=ReflectionSchema, status_code=status.HTTP_201_CREATED)
 @limiter.limit("10/minute")
 async def submit_reflection(
-    request_obj: Request,
+    request: Request,
     purchase_id: str,
     reflection_in: ReflectionCreate,
     db: Session = Depends(dependencies.get_db),
