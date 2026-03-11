@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'services/api_service.dart';
-import 'screens/home_screen.dart';
-import 'screens/income_setup_screen.dart';
-import 'screens/welcome_screen.dart';
+
+import 'core/api/api_service.dart';
+import 'router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,29 +17,48 @@ Future<void> main() async {
     await prefs.setBool('has_seen_welcome', true);
   }
 
+  final initialLoc = onboardingCompleted
+      ? '/'
+      : (showWelcomeRoute(!hasSeenWelcome) ? '/welcome' : '/income_setup');
+
   runApp(
-    MizanApp(
-      showWelcome: !hasSeenWelcome,
-      onboardingCompleted: onboardingCompleted,
+    ProviderScope(
+      child: MizanApp(
+        initialLocation: initialLoc,
+      ),
     ),
   );
 }
 
-class MizanApp extends StatelessWidget {
+bool showWelcomeRoute(bool showWelcome) => showWelcome;
+
+class MizanApp extends ConsumerStatefulWidget {
+  final String initialLocation;
+
   const MizanApp({
     super.key,
-    required this.showWelcome,
-    required this.onboardingCompleted,
+    required this.initialLocation,
   });
 
-  final bool showWelcome;
-  final bool onboardingCompleted;
+  @override
+  ConsumerState<MizanApp> createState() => _MizanAppState();
+}
+
+class _MizanAppState extends ConsumerState<MizanApp> {
+  late final GoRouter _router;
+
+  @override
+  void initState() {
+    super.initState();
+    _router = createRouter(widget.initialLocation);
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Mizan',
       debugShowCheckedModeBanner: false,
+      routerConfig: _router,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData.dark().copyWith(
         primaryColor: const Color(0xFF30e8c9),
@@ -54,9 +74,6 @@ class MizanApp extends StatelessWidget {
           displayColor: Colors.white,
         ),
       ),
-      home: onboardingCompleted
-          ? const HomeScreen()
-          : (showWelcome ? const WelcomeScreen() : const IncomeSetupScreen()),
     );
   }
 }

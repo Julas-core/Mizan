@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/api_service.dart';
+import '../core/api/api_service.dart';
 import 'define_your_goal_screen.dart';
 
 class FixedExpensesScreen extends StatefulWidget {
