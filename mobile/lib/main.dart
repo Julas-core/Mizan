@@ -21,13 +21,7 @@ Future<void> main() async {
       ? '/'
       : (showWelcomeRoute(!hasSeenWelcome) ? '/welcome' : '/income_setup');
 
-  runApp(
-    ProviderScope(
-      child: MizanApp(
-        initialLocation: initialLoc,
-      ),
-    ),
-  );
+  runApp(ProviderScope(child: MizanApp(initialLocation: initialLoc)));
 }
 
 bool showWelcomeRoute(bool showWelcome) => showWelcome;
@@ -35,10 +29,7 @@ bool showWelcomeRoute(bool showWelcome) => showWelcome;
 class MizanApp extends ConsumerStatefulWidget {
   final String initialLocation;
 
-  const MizanApp({
-    super.key,
-    required this.initialLocation,
-  });
+  const MizanApp({super.key, required this.initialLocation});
 
   @override
   ConsumerState<MizanApp> createState() => _MizanAppState();
