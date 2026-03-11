@@ -6,7 +6,7 @@ part 'user.freezed.dart';
 part 'user.g.dart';
 
 @freezed
-class User with _$User {
+abstract class User with _$User {
   const factory User({
     required String id,
     int? timeToSavingsGoalDays,
@@ -17,7 +17,7 @@ class User with _$User {
 }
 
 @freezed
-class UserSummary with _$UserSummary {
+abstract class UserSummary with _$UserSummary {
   const factory UserSummary({
     @JsonKey(name: 'unallocated_money_cents')
     required int unallocatedMoneyCents,

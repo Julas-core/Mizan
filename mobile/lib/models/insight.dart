@@ -4,7 +4,7 @@ part 'insight.freezed.dart';
 part 'insight.g.dart';
 
 @freezed
-class Insight with _$Insight {
+abstract class Insight with _$Insight {
   const factory Insight({
     @JsonKey(name: 'main_behavior_trend') required String mainBehaviorTrend,
     @JsonKey(name: 'friday_overspend_percent')

@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../core/api/api_service.dart';
 
-final authProvider = StateNotifierProvider<AuthNotifier, AuthState>((ref) {
+final authProvider = NotifierProvider<AuthNotifier, AuthState>(() {
   return AuthNotifier();
 });
 
@@ -16,9 +16,11 @@ class AuthState {
   bool get isAuthenticated => userId != null && userId!.isNotEmpty;
 }
 
-class AuthNotifier extends StateNotifier<AuthState> {
-  AuthNotifier() : super(AuthState()) {
+class AuthNotifier extends Notifier<AuthState> {
+  @override
+  AuthState build() {
     _init();
+    return AuthState();
   }
 
   Future<void> _init() async {

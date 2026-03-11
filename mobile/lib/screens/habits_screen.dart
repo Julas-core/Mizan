@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/insights_provider.dart';
-import '../models/insight.dart';
 import '../core/errors/app_exception.dart';
 
 class HabitsScreen extends ConsumerWidget {
@@ -77,10 +76,10 @@ class HabitsScreen extends ConsumerWidget {
                 },
                 data: (insight) => RefreshIndicator(
                   onRefresh: () async {
-                      ref.refresh(insightsProvider);
+                      final _ = ref.refresh(insightsProvider);
                   },
                   child: SingleChildScrollView(
-                    physics: const AlwaysScrollableScrollScrollPhysics(),
+                    physics: const AlwaysScrollableScrollPhysics(),
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

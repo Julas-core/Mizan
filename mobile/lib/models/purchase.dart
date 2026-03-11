@@ -1,12 +1,10 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import 'goal.dart';
-
 part 'purchase.freezed.dart';
 part 'purchase.g.dart';
 
 @freezed
-class Purchase with _$Purchase {
+abstract class Purchase with _$Purchase {
   const factory Purchase({
     required String id,
     @JsonKey(name: 'user_id') required String userId,
@@ -23,7 +21,7 @@ class Purchase with _$Purchase {
 }
 
 @freezed
-class PurchaseEvaluation with _$PurchaseEvaluation {
+abstract class PurchaseEvaluation with _$PurchaseEvaluation {
   const factory PurchaseEvaluation({
     required String verdict, // 'APPROVE', 'DENY', 'DELAY'
     required String reason,

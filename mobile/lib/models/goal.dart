@@ -4,7 +4,7 @@ part 'goal.freezed.dart';
 part 'goal.g.dart';
 
 @freezed
-class Goal with _$Goal {
+abstract class Goal with _$Goal {
   const factory Goal({
     required String id,
     @JsonKey(name: 'user_id') required String userId,

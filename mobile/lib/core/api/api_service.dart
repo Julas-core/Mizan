@@ -128,8 +128,9 @@ class ApiService {
         }
       } catch (e) {
         lastError = e;
-        if (e is AppException)
+        if (e is AppException) {
           rethrow; // Don't swallow AppExceptions, let them bubble up
+        }
         if (e is SocketException || e is TimeoutException) {
           // allow fallback for network issues
         } else {

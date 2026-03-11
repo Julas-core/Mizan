@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import 'screens/create_custom_goal_screen.dart';
@@ -57,8 +56,7 @@ GoRouter createRouter(String initialLoc) {
         builder: (context, state) {
           final extras = state.extra as Map<String, dynamic>? ?? {};
           return DecisionAnalysisScreen(
-            purchaseData: extras['purchaseData'],
-            aiEvaluation: extras['aiEvaluation'],
+            evaluationData: extras['evaluationData'] ?? {},
           );
         },
       ),
@@ -73,11 +71,7 @@ GoRouter createRouter(String initialLoc) {
       GoRoute(
         path: '/purchase_reflection',
         builder: (context, state) {
-          final extras = state.extra as Map<String, dynamic>? ?? {};
-          return PurchaseReflectionScreen(
-            purchaseId: extras['purchaseId'],
-            itemName: extras['itemName'],
-          );
+          return const PurchaseReflectionScreen();
         },
       ),
     ],
