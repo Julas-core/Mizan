@@ -56,27 +56,33 @@ class HabitsScreen extends ConsumerWidget {
               child: insightsAsyncValue.when(
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (error, stack) {
-                    final isNetwork = error is NetworkException;
-                    final msg = error is AppException ? error.message : error.toString();
-                    return Center(
-                        child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                                Icon(isNetwork ? Icons.wifi_off : Icons.error_outline, color: Colors.redAccent, size: 48),
-                                const SizedBox(height: 16),
-                                Text(msg, style: const TextStyle(color: Colors.white)),
-                                const SizedBox(height: 16),
-                                ElevatedButton(
-                                    onPressed: () => ref.refresh(insightsProvider),
-                                    child: const Text('Retry'),
-                                ),
-                            ],
+                  final isNetwork = error is NetworkException;
+                  final msg = error is AppException
+                      ? error.message
+                      : error.toString();
+                  return Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          isNetwork ? Icons.wifi_off : Icons.error_outline,
+                          color: Colors.redAccent,
+                          size: 48,
                         ),
-                    );
+                        const SizedBox(height: 16),
+                        Text(msg, style: const TextStyle(color: Colors.white)),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          onPressed: () => ref.refresh(insightsProvider),
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  );
                 },
                 data: (insight) => RefreshIndicator(
                   onRefresh: () async {
-                      final _ = ref.refresh(insightsProvider);
+                    final _ = ref.refresh(insightsProvider);
                   },
                   child: SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
@@ -126,7 +132,8 @@ class HabitsScreen extends ConsumerWidget {
                                   ),
                                   children: [
                                     TextSpan(
-                                      text: '${insight.fridayOverspendPercent}% more',
+                                      text:
+                                          '${insight.fridayOverspendPercent}% more',
                                       style: const TextStyle(
                                         color: primaryColor,
                                         fontWeight: FontWeight.bold,
@@ -186,11 +193,15 @@ class HabitsScreen extends ConsumerWidget {
                               ),
                               const SizedBox(height: 16),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     'Impulse Purchases',
-                                    style: TextStyle(color: Colors.white, fontSize: 16),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                   Text(
                                     '${insight.boughtPurchasesCount}',
@@ -207,14 +218,20 @@ class HabitsScreen extends ConsumerWidget {
                                 child: Divider(color: Colors.white12),
                               ),
                               Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
                                 children: [
                                   const Text(
                                     'Total Spent',
-                                    style: TextStyle(color: Colors.white, fontSize: 16),
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                    ),
                                   ),
                                   Text(
-                                    _usdFromCents(insight.totalBoughtSpendLast30dCents),
+                                    _usdFromCents(
+                                      insight.totalBoughtSpendLast30dCents,
+                                    ),
                                     style: const TextStyle(
                                       color: Colors.redAccent,
                                       fontSize: 16,
