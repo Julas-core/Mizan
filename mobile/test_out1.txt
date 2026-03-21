@@ -1,0 +1,21 @@
+00:00 +0: loading D:/Projects/Mizan/mobile/test/utils/decision_translator_test.dart
+00:00 +0: DecisionTranslator Translates severe risk / deficit mode correctly
+00:00 +0 -1: DecisionTranslator Translates severe risk / deficit mode correctly [E]
+  Expected: 'This will leave you short before your next income.'
+    Actual: 'This fits comfortably within your plan.'
+     Which: is different.
+            Expected: This will leave ...
+              Actual: This fits comfo ...
+                           ^
+             Differ at offset 5
+  
+  package:matcher                                     expect
+  package:flutter_test/src/widget_tester.dart 473:18  expect
+  test\utils\decision_translator_test.dart 15:7       main.<fn>.<fn>
+  
+00:00 +0 -1: DecisionTranslator High behavior penalty with moderate affordability results in Avoid
+00:00 +1 -1: DecisionTranslator High behavior penalty with high affordability results in Delay
+00:00 +2 -1: DecisionTranslator Prioritizes Behavior > Affordability > Goal in tie-breaking
+00:00 +3 -1: DecisionTranslator Displays correct tiny stat for goal delay
+00:00 +4 -1: DecisionTranslator Low risk maps to Safe to Buy
+00:00 +5 -1: Some tests failed.
