@@ -1,0 +1,41 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.1.1, pluggy-1.6.0 -- C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projects\Mizan\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-0.23.5
+asyncio: mode=Mode.STRICT
+collecting ... collected 7 items
+
+tests/test_api_v1.py::test_get_user_summary PASSED                       [ 14%]
+tests/test_api_v1.py::test_patch_user_balance PASSED                     [ 28%]
+tests/test_api_v1.py::test_get_user_insights PASSED                      [ 42%]
+tests/test_api_v1.py::test_evaluate_purchase_endpoint FAILED             [ 57%]
+tests/test_api_v1.py::test_goals_pagination PASSED                       [ 71%]
+tests/test_api_v1.py::test_history_pagination PASSED                     [ 85%]
+tests/test_api_v1.py::test_evaluate_requires_auth PASSED                 [100%]
+
+================================== FAILURES ===================================
+_______________________ test_evaluate_purchase_endpoint _______________________
+tests\test_api_v1.py:136: in test_evaluate_purchase_endpoint
+    assert "affordability" in bd
+E   AssertionError: assert 'affordability' in {}
+------------------------------ Captured log call ------------------------------
+WARNING  app.services.llm_service:llm_service.py:90 GEMINI_API_KEY is not set. Returning fallback insight.
+============================== warnings summary ===============================
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\formparsers.py:12
+  C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    import multipart
+
+app\core\config.py:4
+  D:\Projects\Mizan\backend\app\core\config.py:4: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\httpx\_client.py:680
+  C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_api_v1.py::test_evaluate_purchase_endpoint - AssertionError...
+=================== 1 failed, 6 passed, 3 warnings in 5.01s ===================

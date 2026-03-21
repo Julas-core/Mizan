@@ -1,0 +1,95 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.1.1, pluggy-1.6.0 -- C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projects\Mizan\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-0.23.5
+asyncio: mode=Mode.STRICT
+collecting ... collected 7 items
+
+tests/test_api_v1.py::test_get_user_summary PASSED                       [ 14%]
+tests/test_api_v1.py::test_patch_user_balance PASSED                     [ 28%]
+tests/test_api_v1.py::test_get_user_insights PASSED                      [ 42%]
+tests/test_api_v1.py::test_evaluate_purchase_endpoint FAILED             [ 57%]
+tests/test_api_v1.py::test_goals_pagination PASSED                       [ 71%]
+tests/test_api_v1.py::test_history_pagination PASSED                     [ 85%]
+tests/test_api_v1.py::test_evaluate_requires_auth PASSED                 [100%]
+
+================================== FAILURES ===================================
+_______________________ test_evaluate_purchase_endpoint _______________________
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1970: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:924: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlite3.IntegrityError: NOT NULL constraint failed: expenses.name
+
+The above exception was the direct cause of the following exception:
+tests\test_api_v1.py:117: in test_evaluate_purchase_endpoint
+    db.commit()
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1972: in commit
+    trans.commit(_to_root=True)
+<string>:2: in commit
+    ???
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1257: in commit
+    self._prepare_impl()
+<string>:2: in _prepare_impl
+    ???
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\state_changes.py:139: in _go
+    ret_value = fn(self, *arg, **kw)
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:1232: in _prepare_impl
+    self.session.flush()
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4296: in flush
+    self._flush(objects)
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4431: in _flush
+    with util.safe_reraise():
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\util\langhelpers.py:146: in __exit__
+    raise exc_value.with_traceback(exc_tb)
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\session.py:4392: in _flush
+    flush_context.execute()
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:466: in execute
+    rec.execute(self)
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\unitofwork.py:642: in execute
+    util.preloaded.orm_persistence.save_obj(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:93: in save_obj
+    _emit_insert_statements(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\orm\persistence.py:1233: in _emit_insert_statements
+    result = connection.execute(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1421: in execute
+    return meth(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\sql\elements.py:514: in _execute_on_connection
+    return connection._execute_clauseelement(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1643: in _execute_clauseelement
+    ret = self._execute_context(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1849: in _execute_context
+    return self._exec_single_context(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1989: in _exec_single_context
+    self._handle_dbapi_exception(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:2356: in _handle_dbapi_exception
+    raise sqlalchemy_exception.with_traceback(exc_info[2]) from e
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\base.py:1970: in _exec_single_context
+    self.dialect.do_execute(
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\sqlalchemy\engine\default.py:924: in do_execute
+    cursor.execute(statement, parameters)
+E   sqlalchemy.exc.IntegrityError: (sqlite3.IntegrityError) NOT NULL constraint failed: expenses.name
+E   [SQL: INSERT INTO expenses (id, user_id, name, amount_cents, is_fixed, due_date_day) VALUES (?, ?, ?, ?, ?, ?)]
+E   [parameters: ('f08c1146-7279-4403-a17e-f40658abfe73', '788ce996-a2d1-4f9b-995a-7dfa9a0dad31', None, 50000, 1, 1)]
+E   (Background on this error at: https://sqlalche.me/e/20/gkpj)
+============================== warnings summary ===============================
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\formparsers.py:12
+  C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\starlette\formparsers.py:12: PendingDeprecationWarning: Please use `import python_multipart` instead.
+    import multipart
+
+app\core\config.py:4
+  D:\Projects\Mizan\backend\app\core\config.py:4: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\httpx\_client.py:680
+  C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\httpx\_client.py:680: DeprecationWarning: The 'app' shortcut is now deprecated. Use the explicit style 'transport=WSGITransport(app=...)' instead.
+    warnings.warn(message, DeprecationWarning)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+FAILED tests/test_api_v1.py::test_evaluate_purchase_endpoint - sqlalchemy.exc...
+=================== 1 failed, 6 passed, 3 warnings in 5.63s ===================

@@ -22,6 +22,13 @@ class Settings(BaseSettings):
     # Gemini LLM
     GEMINI_API_KEY: Optional[str] = None
 
+    # Risk Model Weights (must sum to > 0, auto-normalized)
+    RISK_W_AFFORD: float = 0.5
+    RISK_W_BEHAVE: float = 0.3
+    RISK_W_GOAL: float = 0.2
+    MAX_BEHAVIOR_PENALTY: float = 0.25
+    MIN_GOAL_WINDOW_DAYS: int = 7
+
     class Config:
         case_sensitive = True
         env_file = ".env"

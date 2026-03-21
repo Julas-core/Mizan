@@ -173,14 +173,42 @@ def get_user_insights(user_id: str, db: Session = Depends(dependencies.get_db), 
     if top_cat:
         top_regret_category = top_cat[0]
 
-    # Return structure with some placeholders for advanced metrics until we have enough data
+    # 5. Generate dynamic insights via insight_generator
+    from app.services.insight_generator import generate_insights
+    from app.services.decision_engine import (
+        simulate_cashflow_timeline, EngineIncome as EI, EngineExpense as EE
+    )
+
+    # Build cashflow timeline for the low-balance insight
+    cashflow_timeline = None
+    if user.incomes and user.expenses:
+        engine_incomes = [
+            EI(amount_cents=i.amount_cents, frequency=i.frequency,
+               next_paydate=i.next_paydate, confidence_score=i.confidence_score)
+            for i in user.incomes
+        ]
+        engine_expenses = [
+            EE(amount_cents=e.amount_cents, is_fixed=e.is_fixed, due_date_day=e.due_date_day)
+            for e in user.expenses
+        ]
+        starting = user.current_balance_cents or 0
+        cashflow_timeline = simulate_cashflow_timeline(
+            date.today(), starting, engine_incomes, engine_expenses
+        )
+
+    dynamic_insights = generate_insights(db, user_id, cashflow_timeline)
+    main_trend = dynamic_insights[0] if dynamic_insights else "Keep tracking your spending to unlock insights!"
+
+    # 6. Behavioral score (simple: 100 - regret_rate)
+    behavioral_score = max(0, 100 - high_regret_rate_percent)
+
     return UserHabitsInsights(
-        main_behavior_trend="You are spending 15% less on impulses this week!",
-        friday_overspend_percent=20,
-        impulse_window="Late Night (10PM - 2AM)",
+        main_behavior_trend=main_trend,
+        friday_overspend_percent=0,
+        impulse_window=dynamic_insights[2] if len(dynamic_insights) > 2 else "Not enough data yet",
         top_regret_category=top_regret_category,
         high_regret_rate_percent=high_regret_rate_percent,
         bought_purchases_count=bought_count,
         total_bought_spend_last_30d_cents=int(bought_spend),
-        behavioral_score=85
+        behavioral_score=behavioral_score,
     )

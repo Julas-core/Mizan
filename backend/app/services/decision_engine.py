@@ -1,7 +1,10 @@
 import math
+import logging
 from datetime import date, timedelta
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 # --- Input Models for Pure Functions ---
 class EngineIncome(BaseModel):
@@ -20,13 +23,22 @@ class EngineGoal(BaseModel):
     target_amount_cents: int
     priority: int
 
+class GoalDelayDetail(BaseModel):
+    delay_days: Optional[float] = None
+    relative_delay_pct: Optional[float] = None  # e.g. 0.18 = "delays goal by 18%"
+    unreachable: bool = False
+
 class EvaluationResult(BaseModel):
     affordability_score: int
     risk_level: str
     days_impacted: float
     liquidity_failure: bool
     deficit_mode: bool
-    goals_delayed: Dict[str, float]  # goal_id -> equivalent days delayed
+    goals_delayed: Dict[str, float]  # legacy: goal_id -> delay days
+    goal_delay_days: Dict[str, Any] = {}  # goal_id -> GoalDelayDetail dict
+    risk_breakdown: Dict[str, Any] = {}  # structured explanation
+    behavior_penalty: float = 0.0
+    behavior_explanation: str = ""
 
 # --- Constants & Risk Thresholds ---
 HORIZON_DAYS = 30
@@ -34,6 +46,7 @@ UNCERTAINTY_MARGIN_PCT = 0.05
 LOGISTIC_MIDPOINT = 0.5  # 50% of budget consumed
 LOGISTIC_K_FACTOR = 10   # Steepness of the risk curve
 EARLY_CREDIT_FREQUENCIES = {"Weekly", "Biweekly"}
+MIN_GOAL_WINDOW_DAYS = 7  # default, can be overridden from config
 
 # --- Core Functions ---
 
@@ -112,32 +125,93 @@ def calculate_nonlinear_affordability(budget_consumed_pct: float) -> int:
     score_raw = 100 / (1 + math.exp(exponent))
     return int(round(score_raw))
 
+def simulate_goal_delays(
+    item_price_cents: int,
+    goals: List[EngineGoal],
+    daily_safe_capacity: float,
+    min_goal_window_days: int = MIN_GOAL_WINDOW_DAYS,
+) -> tuple[Dict[str, float], Dict[str, dict]]:
+    """
+    Compute both legacy goals_delayed and detailed goal_delay_days.
+    
+    Returns:
+        (goals_delayed, goal_delay_days)
+        - goals_delayed: {goal_id: delay_days} (legacy format)
+        - goal_delay_days: {goal_id: {delay_days, relative_delay_pct, unreachable}}
+    """
+    goals_delayed: Dict[str, float] = {}
+    goal_delay_days: Dict[str, dict] = {}
+    remaining_impact_cents = item_price_cents
+
+    sorted_goals = sorted(goals, key=lambda g: g.priority)
+
+    for g in sorted_goals:
+        if remaining_impact_cents <= 0:
+            break
+
+        deduction = min(remaining_impact_cents, g.target_amount_cents)
+
+        # Guard: division by zero or negative savings rate
+        if daily_safe_capacity <= 0:
+            goals_delayed[g.id] = 0.0
+            goal_delay_days[g.id] = GoalDelayDetail(
+                unreachable=True
+            ).model_dump()
+        else:
+            delayed_days = deduction / daily_safe_capacity
+            goals_delayed[g.id] = round(delayed_days, 1)
+
+            # Compute relative delay
+            remaining_days = g.target_amount_cents / daily_safe_capacity
+            if remaining_days <= min_goal_window_days:
+                # Goal window too small for meaningful percentage
+                goal_delay_days[g.id] = GoalDelayDetail(
+                    delay_days=round(delayed_days, 1),
+                    relative_delay_pct=None,
+                ).model_dump()
+            else:
+                rel_pct = round(delayed_days / remaining_days, 3)
+                goal_delay_days[g.id] = GoalDelayDetail(
+                    delay_days=round(delayed_days, 1),
+                    relative_delay_pct=rel_pct,
+                ).model_dump()
+
+        remaining_impact_cents -= deduction
+
+    return goals_delayed, goal_delay_days
+
+
 def evaluate_purchase(
     item_price_cents: int,
     starting_cash_cents: int,
     incomes: List[EngineIncome],
     expenses: List[EngineExpense] | EngineExpense,
     goals: List[EngineGoal],
-    current_date: date = date.today()
+    current_date: date = date.today(),
+    behavior_penalty: float = 0.0,
+    behavior_explanation: str = "",
+    risk_weights: Optional[tuple[float, float, float]] = None,
+    max_behavior_penalty: float = 0.25,
+    min_goal_window_days: int = MIN_GOAL_WINDOW_DAYS,
 ) -> EvaluationResult:
     """
     The master evaluation algorithm. Evaluates the risk and impact of buying an item TODAY.
+    Now integrates the composite risk model with behavior penalties and goal delay simulation.
     """
+    from app.services.risk_model import compute_composite_risk, explain_risk
 
     normalized_expenses = expenses if isinstance(expenses, list) else [expenses]
-    
+    w_afford, w_behave, w_goal = risk_weights or (0.5, 0.3, 0.2)
+
     # 1. Run baseline simulation (If we DON'T buy the item)
-    # Deep copy incomes to safely mutate next_paydates during simulation
     baseline_incomes = [EngineIncome(**inc.model_dump()) for inc in incomes]
     baseline_timeline = simulate_cashflow_timeline(current_date, starting_cash_cents, baseline_incomes, normalized_expenses)
-    
+
     total_inflows = sum(b - baseline_timeline[i-1] for i, b in enumerate(baseline_timeline) if i > 0 and b > baseline_timeline[i-1])
-    # Protect against zero division/baseline calculation differences
     total_inflows = max(total_inflows, 1)
 
-    # Calculate cycle budget to detect deficit/break-even scenarios
     cycle_budget = baseline_timeline[-1] - starting_cash_cents
-    
+
     # --- Edge Case 1: Deficit Mode ---
     if cycle_budget <= 1e-6:
         return EvaluationResult(
@@ -146,20 +220,19 @@ def evaluate_purchase(
             days_impacted=0.0,
             liquidity_failure=True,
             deficit_mode=True,
-            goals_delayed={}
+            goals_delayed={},
+            behavior_penalty=behavior_penalty,
+            behavior_explanation=behavior_explanation,
         )
 
-    # Daily safe capacity for delay/impact distribution
     daily_safe_capacity = total_inflows / HORIZON_DAYS
-        
-    # --- 2. Run Purchase Simulation (If we DO buy the item) ---
+
+    # --- 2. Run Purchase Simulation ---
     purchase_incomes = [EngineIncome(**inc.model_dump()) for inc in incomes]
     purchase_timeline = simulate_cashflow_timeline(current_date, starting_cash_cents - item_price_cents, purchase_incomes, normalized_expenses)
-    
-    # --- Liquidity Hard Gate Check ---
-    # Did the purchase cause the balance to drop below zero on ANY day in the next 30 days?
+
     liquidity_failure = any(balance < 0 for balance in purchase_timeline)
-    
+
     if liquidity_failure:
         return EvaluationResult(
             affordability_score=0,
@@ -167,47 +240,72 @@ def evaluate_purchase(
             days_impacted=item_price_cents / daily_safe_capacity,
             liquidity_failure=True,
             deficit_mode=False,
-            goals_delayed={}
+            goals_delayed={},
+            behavior_penalty=behavior_penalty,
+            behavior_explanation=behavior_explanation,
         )
-        
+
     # --- Standard Evaluation ---
     budget_consumed_pct = item_price_cents / cycle_budget
     affordability_score = calculate_nonlinear_affordability(budget_consumed_pct)
-    
-    if budget_consumed_pct < 0.2:
-        risk = "Low Risk"
-    elif budget_consumed_pct < 0.5:
-        risk = "Moderate Risk"
-    elif budget_consumed_pct < 1.0:
-        risk = "High Risk"
-    else:
-        risk = "Severe Risk"
-        
+
     days_impacted = item_price_cents / daily_safe_capacity
-    
-    # --- Cascading Goal Delay ---
-    goals_delayed = {}
-    remaining_impact_cents = item_price_cents
-    
-    # Sort goals by Priority (1 is highest)
-    sorted_goals = sorted(goals, key=lambda g: g.priority)
-    
-    for g in sorted_goals:
-        if remaining_impact_cents <= 0:
-            break
-            
-        deduction = min(remaining_impact_cents, g.target_amount_cents)
-        # Calculate how many "days of savings" this deduction represents
-        # (Assuming all daily buffer goes to savings. Adjust logic if specific % goes to savings)
-        delayed_days = deduction / daily_safe_capacity
-        goals_delayed[g.id] = round(delayed_days, 1)
-        remaining_impact_cents -= deduction
+
+    # --- Goal Delay Simulation ---
+    goals_delayed, goal_delay_days = simulate_goal_delays(
+        item_price_cents=item_price_cents,
+        goals=goals,
+        daily_safe_capacity=daily_safe_capacity,
+        min_goal_window_days=min_goal_window_days,
+    )
+
+    # --- Composite Risk Score ---
+    budget_pressure = min(budget_consumed_pct, 1.0)
+
+    # Goal delay impact: average relative delay across all affected goals (0-1)
+    relative_delays = [
+        d.get("relative_delay_pct", 0) or 0
+        for d in goal_delay_days.values()
+        if not d.get("unreachable", False)
+    ]
+    goal_delay_impact = min(sum(relative_delays) / max(len(relative_delays), 1), 1.0)
+
+    risk_score = compute_composite_risk(
+        budget_pressure=budget_pressure,
+        behavior_penalty=behavior_penalty,
+        goal_delay_impact=goal_delay_impact,
+        w_afford=w_afford,
+        w_behave=w_behave,
+        w_goal=w_goal,
+    )
+
+    # Map composite score to risk level
+    if risk_score < 20:
+        risk_level = "Low Risk"
+    elif risk_score < 50:
+        risk_level = "Moderate Risk"
+    elif risk_score < 75:
+        risk_level = "High Risk"
+    else:
+        risk_level = "Severe Risk"
+
+    risk_breakdown = explain_risk(
+        budget_pressure=budget_pressure,
+        behavior_penalty=behavior_penalty,
+        goal_delay_impact=goal_delay_impact,
+        final_score=risk_score,
+        behavior_explanation=behavior_explanation,
+    )
 
     return EvaluationResult(
         affordability_score=affordability_score,
-        risk_level=risk,
+        risk_level=risk_level,
         days_impacted=round(days_impacted, 1),
         liquidity_failure=False,
         deficit_mode=False,
-        goals_delayed=goals_delayed
+        goals_delayed=goals_delayed,
+        goal_delay_days=goal_delay_days,
+        risk_breakdown=risk_breakdown,
+        behavior_penalty=behavior_penalty,
+        behavior_explanation=behavior_explanation,
     )

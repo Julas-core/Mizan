@@ -10,6 +10,8 @@ from app.db.base_class import Base
 from app.models.user import User
 from app.models.goal import Goal
 from app.models.reflection import Purchase, Reflection
+from app.models.income import Income
+from app.models.expense import Expense
 from app.core.security import create_access_token
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./test_api.db"
@@ -95,6 +97,55 @@ def test_get_user_insights():
     data = response.json()
     assert data["bought_purchases_count"] == 1
     assert data["total_bought_spend_last_30d_cents"] == 500
+    
+    # Check new dynamic fields
+    assert "top_regret_category" in data
+    assert "behavioral_score" in data
+    assert "high_regret_rate_percent" in data
+    
+    db.close()
+
+def test_evaluate_purchase_endpoint():
+    db = TestingSessionLocal()
+    user = create_test_user(db)
+    token = get_token(user)
+    
+    # Needs income/expenses so it doesn't fail at Deficit Mode
+    inc = Income(user_id=user.id, amount_cents=500000, frequency="Monthly", next_paydate=date.today())
+    exp = Expense(user_id=user.id, amount_cents=50000, name="Rent", is_fixed=True, due_date_day=1)
+    db.add_all([inc, exp])
+    db.commit()
+
+    # Payload for evaluate
+    payload = {
+        "item_name": "New Laptop",
+        "price_cents": 15000,
+        "category": "Electronics"
+    }
+    
+    response = client.post(
+        f"/api/v1/decisions/{user.id}/evaluate",
+        json=payload,
+        headers={"Authorization": f"Bearer {token}"}
+    )
+    
+    assert response.status_code == 200
+    data = response.json()
+    
+    assert "purchase_id" in data
+    assert "affordability_score" in data
+    assert "risk_level" in data
+    assert "goal_delay_days" in data
+    assert "risk_breakdown" in data
+    assert "behavior_penalty" in data
+    
+    # Specific breakdown shape check
+    bd = data["risk_breakdown"]
+    assert "affordability" in bd
+    assert "behavior" in bd
+    assert "goal_impact" in bd
+    assert "final_score" in bd
+    
     db.close()
 
 def test_goals_pagination():

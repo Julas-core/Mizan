@@ -1,0 +1,33 @@
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-8.1.1, pluggy-1.6.0 -- C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\python.exe
+cachedir: .pytest_cache
+rootdir: D:\Projects\Mizan\backend
+configfile: pytest.ini
+plugins: anyio-4.12.1, asyncio-0.23.5
+asyncio: mode=Mode.STRICT
+collecting ... collected 0 items / 1 error
+
+=================================== ERRORS ====================================
+____________________ ERROR collecting tests/test_api_v1.py ____________________
+tests\test_api_v1.py:7: in <module>
+    from app.main import app
+app\main.py:5: in <module>
+    from app.core.config import settings
+app\core\config.py:36: in <module>
+    settings = Settings()
+C:\Users\JulasJr\AppData\Local\Programs\Python\Python311\Lib\site-packages\pydantic_settings\main.py:84: in __init__
+    super().__init__(
+E   pydantic_core._pydantic_core.ValidationError: 1 validation error for Settings
+E   DATABASE_URL
+E     Field required [type=missing, input_value={}, input_type=dict]
+E       For further information visit https://errors.pydantic.dev/2.12/v/missing
+============================== warnings summary ===============================
+app\core\config.py:4
+  D:\Projects\Mizan\backend\app\core\config.py:4: PydanticDeprecatedSince20: Support for class-based `config` is deprecated, use ConfigDict instead. Deprecated in Pydantic V2.0 to be removed in V3.0. See Pydantic V2 Migration Guide at https://errors.pydantic.dev/2.12/migration/
+    class Settings(BaseSettings):
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/test_api_v1.py - pydantic_core._pydantic_core.ValidationError: 1 ...
+!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!
+========================= 1 warning, 1 error in 1.98s =========================
