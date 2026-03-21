@@ -1,0 +1,30 @@
+# Virtual environments
+.venv/
+__pycache__/
+*.pyc
+
+# Test artifacts
+.pytest_cache/
+test_*.db
+pytest_*.txt
+import_out.txt
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+
+# Local database
+*.db
+
+# Environment
+.env
+
+# Git
+.git/
+.gitignore
+
+# Docker
+Dockerfile
+docker-compose.yml

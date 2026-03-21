@@ -1,0 +1,46 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: mizan
+      POSTGRES_PASSWORD: mizan_secret
+      POSTGRES_DB: mizan_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mizan -d mizan_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+    environment:
+      DATABASE_URL: postgresql://mizan:mizan_secret@db:5432/mizan_db
+      ENVIRONMENT: production
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        gunicorn app.main:app
+          --worker-class uvicorn.workers.UvicornWorker
+          --bind 0.0.0.0:8000
+          --workers 2
+          --timeout 120
+          --access-logfile -
+      "
+
+volumes:
+  pgdata:
