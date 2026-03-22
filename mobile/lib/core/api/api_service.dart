@@ -33,38 +33,20 @@ class ApiService {
   }
 
   static List<String> _candidateBaseUrls() {
-    final hasCustomApiBase =
-        physicalDeviceBaseUrl != _defaultPhysicalDeviceBaseUrl;
-
     final urls = <String>[];
-    void addUrl(String url) {
-      if (!urls.contains(url)) {
-        urls.add(url);
-      }
-    }
+    
+    // 1. Prioritize Remote/Physical Target
+    urls.add(physicalDeviceBaseUrl);
 
-    if (kIsWeb) {
-      addUrl(physicalDeviceBaseUrl);
-      if (!hasCustomApiBase) {
-        addUrl(baseUrl);
+    // 2. Add Local Fallbacks ONLY in Debug Mode
+    if (kDebugMode) {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        urls.add(emulatorBaseUrl);
       }
-      return urls;
+      urls.add(baseUrl);
     }
-
-    if (defaultTargetPlatform == TargetPlatform.android) {
-      addUrl(physicalDeviceBaseUrl);
-      if (!hasCustomApiBase) {
-        addUrl(emulatorBaseUrl);
-        addUrl(baseUrl);
-      }
-      return urls;
-    }
-
-    addUrl(physicalDeviceBaseUrl);
-    if (!hasCustomApiBase) {
-      addUrl(baseUrl);
-    }
-    return urls;
+    
+    return urls.toSet().toList(); // Unique items only
   }
 
   static String _requireUserId() {
@@ -97,6 +79,9 @@ class ApiService {
 
     Object? lastError;
     for (final url in urls) {
+      if (kDebugMode) {
+        print('ApiService: Attempting $method $url');
+      }
       try {
         http.Response response;
         if (method == 'GET') {
@@ -140,7 +125,10 @@ class ApiService {
     }
 
     if (lastError is SocketException || lastError is TimeoutException) {
-      throw const NetworkException();
+      final msg = kDebugMode 
+        ? 'Network error: $method ${urls.first}. Is the backend up at Render?' 
+        : 'Network connection failed.';
+      throw NetworkException(msg);
     }
 
     throw lastError is Exception ? lastError : const UnknownException();

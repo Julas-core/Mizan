@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import '../core/api/api_service.dart';
 import 'decision_analysis_screen.dart';
+import 'decision_input_screen.dart';
 import 'goals_hub_screen.dart';
 import 'purchase_reflection_screen.dart';
 import 'habits_screen.dart';

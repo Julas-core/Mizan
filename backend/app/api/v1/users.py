@@ -10,6 +10,22 @@ from app.services.decision_engine import (
 )
 
 router = APIRouter()
+from app.schemas.user import UserCreate
+
+@router.post("/", response_model=UserSchema, status_code=status.HTTP_201_CREATED)
+def create_user(user_in: UserCreate, db: Session = Depends(dependencies.get_db)):
+    """
+    Create a new anonymous user during onboarding.
+    Returns the user ID to be stored locally on the device.
+    """
+    db_user = UserModel(
+        time_to_savings_goal_days=user_in.time_to_savings_goal_days,
+        current_balance_cents=user_in.current_balance_cents or 0
+    )
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 @router.patch("/{user_id}", response_model=UserSchema)
 def update_user(user_id: str, user_in: UserBase, db: Session = Depends(dependencies.get_db), current_user = Depends(get_current_user)):

@@ -8,8 +8,8 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
 
-    # CORS
-    ALLOWED_ORIGINS: str = "http://localhost:8000,http://localhost:3000"
+    # CORS (Allowing all for easier testing against Render)
+    ALLOWED_ORIGINS: str = "*"
 
     # Database
     DATABASE_URL: str
