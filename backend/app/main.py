@@ -14,6 +14,33 @@ from app.api.errors import add_exception_handlers
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     setup_logging()
+    
+    # Run database migrations automatically on startup
+    # This is crucial for environments like Render's free tier that don't allow pre-deploy commands
+    try:
+        from alembic.config import Config
+        from alembic import command
+        import os
+        
+        # Look for alembic.ini in the current directory or one level up
+        ini_path = "alembic.ini"
+        if not os.path.exists(ini_path):
+            ini_path = "../alembic.ini"
+            
+        if os.path.exists(ini_path):
+            print(f"Auto-migration: Running 'alembic upgrade head' using {ini_path}...")
+            alembic_cfg = Config(ini_path)
+            # Ensure the database URL from settings is used if needed
+            # alembic_cfg.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+            command.upgrade(alembic_cfg, "head")
+            print("Auto-migration: Success!")
+        else:
+            print("Auto-migration: alembic.ini not found, skipping.")
+    except Exception as e:
+        print(f"Auto-migration: Failed! {str(e)}")
+        # We don't raise here to allow the app to start even if migration fails 
+        # (though it will likely fail later on DB queries)
+
     from app.services.scheduler import start_scheduler, stop_scheduler
     start_scheduler()
     yield
