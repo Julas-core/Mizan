@@ -8,6 +8,7 @@ from app.schemas.user import User as UserSchema, UserBase, UserSummary
 from app.services.decision_engine import (
     EngineIncome, EngineExpense
 )
+from app.core.security import create_access_token
 
 router = APIRouter()
 from app.schemas.user import UserCreate
@@ -26,6 +27,11 @@ def create_user(user_in: UserCreate, db: Session = Depends(dependencies.get_db))
         db.add(db_user)
         db.commit()
         db.refresh(db_user)
+        
+        # Generate token for the new anonymous user
+        token = create_access_token(user_id=db_user.id, email=None)
+        db_user.access_token = token
+        
         return db_user
     except Exception as e:
         db.rollback()

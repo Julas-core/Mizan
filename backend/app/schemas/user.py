@@ -21,6 +21,7 @@ class User(UserBase):
     expenses: List[Expense] = []
     goals: List[Goal] = []
     current_balance_cents: int = 0
+    access_token: Optional[str] = None
 
 class UserSummary(BaseModel):
     safe_to_spend_cents: int

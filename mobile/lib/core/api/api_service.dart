@@ -18,23 +18,33 @@ class ApiService {
     defaultValue: _defaultPhysicalDeviceBaseUrl,
   );
   static String _currentUserId = '';
+  static String _token = '';
   static SharedPreferences? _prefs;
 
   static String get currentUserId => _currentUserId;
+  static String get token => _token;
 
   static Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     _currentUserId = _prefs?.getString('current_user_id') ?? '';
+    _token = _prefs?.getString('auth_token') ?? '';
     if (kDebugMode) {
-      print('ApiService: Initialized with UserID: "$_currentUserId"');
+      print('ApiService: Initialized with UserID: "$_currentUserId", Token: "${_token.isNotEmpty ? 'SET' : 'MISSING'}"');
     }
   }
 
-  static Future<void> _persistCurrentUserId(String userId) async {
+  static Future<void> _persistCurrentUserId(String userId, [String? token]) async {
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs!.setString('current_user_id', userId);
+    _currentUserId = userId;
+    
+    if (token != null) {
+      await _prefs!.setString('auth_token', token);
+      _token = token;
+    }
+    
     if (kDebugMode) {
-      print('ApiService: Persisted UserID: "$userId"');
+      print('ApiService: Persisted UserID: "$userId" ${token != null ? '(with new Token)' : ''}');
     }
   }
 
@@ -67,10 +77,16 @@ class ApiService {
     return _currentUserId;
   }
 
-  static Map<String, String> _jsonHeaders({String? idempotencyKey}) {
-    final headers = <String, String>{'Content-Type': 'application/json'};
-    if (idempotencyKey != null && idempotencyKey.isNotEmpty) {
-      headers['Idempotency-Key'] = idempotencyKey;
+  static Map<String, String> _jsonHeaders([String? idempotencyKey]) {
+    final headers = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    if (idempotencyKey != null) {
+      headers['X-Idempotency-Key'] = idempotencyKey;
+    }
+    if (_token.isNotEmpty) {
+      headers['Authorization'] = 'Bearer $_token';
     }
     return headers;
   }
@@ -145,7 +161,11 @@ class ApiService {
 
   static Future<Map<String, dynamic>> getUserSummary() async {
     final userId = _requireUserId();
-    final response = await _executeRequest('GET', '/users/$userId/summary');
+    final response = await _executeRequest(
+      'GET', 
+      '/users/$userId/summary',
+      headers: _jsonHeaders(),
+    );
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
@@ -153,16 +173,19 @@ class ApiService {
     final response = await _executeRequest(
       'POST',
       '/users/',
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({'time_to_savings_goal_days': null}),
     );
+
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final id = decoded['id'] as String?;
+    final token = decoded['access_token'] as String?;
+    
     if (id == null || id.isEmpty) {
       throw const UnknownException('Backend did not return a valid user id');
     }
-    _currentUserId = id;
-    await _persistCurrentUserId(id);
+    
+    await _persistCurrentUserId(id, token);
     return id;
   }
 
@@ -176,7 +199,7 @@ class ApiService {
     await _executeRequest(
       'POST',
       '/onboarding/$userId/income',
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'amount_cents': amountCents,
         'frequency': frequency,
@@ -196,7 +219,7 @@ class ApiService {
     await _executeRequest(
       'POST',
       '/onboarding/$userId/expenses',
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'name': name,
         'amount_cents': amountCents,
@@ -216,7 +239,7 @@ class ApiService {
     await _executeRequest(
       'POST',
       '/onboarding/$userId/goal',
-      headers: {'Content-Type': 'application/json'},
+      headers: _jsonHeaders(),
       body: jsonEncode({
         'name': name,
         'target_amount_cents': targetAmountCents,
@@ -228,14 +251,22 @@ class ApiService {
 
   static Future<List<Map<String, dynamic>>> getGoals() async {
     final userId = _requireUserId();
-    final response = await _executeRequest('GET', '/onboarding/$userId/goals');
+    final response = await _executeRequest(
+      'GET', 
+      '/onboarding/$userId/goals',
+      headers: _jsonHeaders(),
+    );
     final decoded = jsonDecode(response.body) as List<dynamic>;
     return decoded.cast<Map<String, dynamic>>();
   }
 
   static Future<Map<String, dynamic>> getHabitsInsights() async {
     final userId = _requireUserId();
-    final response = await _executeRequest('GET', '/users/$userId/insights');
+    final response = await _executeRequest(
+      'GET', 
+      '/users/$userId/insights',
+      headers: _jsonHeaders(),
+    );
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
 
@@ -265,6 +296,7 @@ class ApiService {
     final response = await _executeRequest(
       'GET',
       '/purchases/$userId/latest-evaluated',
+      headers: _jsonHeaders(),
     );
     return jsonDecode(response.body) as Map<String, dynamic>;
   }
@@ -292,6 +324,7 @@ class ApiService {
     final response = await _executeRequest(
       'GET',
       '/purchases/$userId/history?status_filter=ABANDONED',
+      headers: _jsonHeaders(),
     );
     final decoded = jsonDecode(response.body) as List<dynamic>;
     return decoded.cast<Map<String, dynamic>>();
