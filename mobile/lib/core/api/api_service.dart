@@ -25,11 +25,17 @@ class ApiService {
   static Future<void> initialize() async {
     _prefs = await SharedPreferences.getInstance();
     _currentUserId = _prefs?.getString('current_user_id') ?? '';
+    if (kDebugMode) {
+      print('ApiService: Initialized with UserID: "$_currentUserId"');
+    }
   }
 
   static Future<void> _persistCurrentUserId(String userId) async {
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs!.setString('current_user_id', userId);
+    if (kDebugMode) {
+      print('ApiService: Persisted UserID: "$userId"');
+    }
   }
 
   static List<String> _candidateBaseUrls() {
@@ -51,6 +57,9 @@ class ApiService {
 
   static String _requireUserId() {
     if (_currentUserId.isEmpty) {
+      if (kDebugMode) {
+        print('ApiService: ERROR - _requireUserId called but _currentUserId is empty!');
+      }
       throw const AuthException(
         'No active user found. Complete onboarding first.',
       );

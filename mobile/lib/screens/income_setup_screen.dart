@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/api/api_service.dart';
+import 'package:mobile/core/api/api_service.dart';
 import 'fixed_expenses_screen.dart';
 
 class IncomeSetupScreen extends StatefulWidget {

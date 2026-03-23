@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../core/api/api_service.dart';
+import 'package:mobile/core/api/api_service.dart';
 import 'ready_to_start_screen.dart';
 
 class CreateCustomGoalScreen extends StatefulWidget {

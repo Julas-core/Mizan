@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../core/api/api_service.dart';
+import 'package:mobile/core/api/api_service.dart';
 import '../models/goal.dart';
 import '../models/insight.dart';
 import '../models/purchase.dart';

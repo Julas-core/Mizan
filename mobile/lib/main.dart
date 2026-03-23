@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'core/api/api_service.dart';
+import 'package:mobile/core/api/api_service.dart';
 import 'router.dart';
 
 Future<void> main() async {
@@ -17,9 +17,10 @@ Future<void> main() async {
     await prefs.setBool('has_seen_welcome', true);
   }
 
+  final userId = ApiService.currentUserId;
   final initialLoc = onboardingCompleted
       ? '/'
-      : (showWelcomeRoute(!hasSeenWelcome) ? '/welcome' : '/income_setup');
+      : (userId.isEmpty ? '/welcome' : '/income_setup');
 
   runApp(ProviderScope(child: MizanApp(initialLocation: initialLoc)));
 }
