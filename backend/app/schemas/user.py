@@ -23,6 +23,12 @@ class User(UserBase):
     current_balance_cents: int = 0
     access_token: Optional[str] = None
 
+class UpcomingBill(BaseModel):
+    name: str
+    amount_cents: int
+    date: str
+    days_until: int
+
 class UserSummary(BaseModel):
     safe_to_spend_cents: int
     days_to_next_income: int
@@ -30,6 +36,9 @@ class UserSummary(BaseModel):
     total_monthly_fixed_expenses_cents: int
     total_goals_priority_weight: int
     current_balance_cents: int
+    days_to_next_bill: int
+    next_bill_amount_cents: int
+    upcoming_bills: List[UpcomingBill] = []
 
 
 class UserHabitsInsights(BaseModel):

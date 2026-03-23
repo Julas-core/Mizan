@@ -6,3 +6,4 @@ from app.models.goal import Goal # noqa
 from app.models.reflection import Purchase, Reflection # noqa
 from app.models.idempotency import IdempotencyKey # noqa
 from app.models.outbox import OutboxEvent # noqa
+from app.models.decision_event import DecisionEvent # noqa

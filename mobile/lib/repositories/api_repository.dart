@@ -128,4 +128,46 @@ class ApiRepository {
     );
     return Purchase.fromJson(data);
   }
+
+  Future<Map<String, dynamic>> postDecisionEvent({
+    required String eventType,
+    String? purchaseId,
+    String? verdict,
+    String? dominantFactor,
+    String? riskLevel,
+    String? category,
+    String? amountBand,
+    String? recommendedAction,
+    String? userAction,
+    bool? overrodeRecommendation,
+    bool? feedbackHelpful,
+    Map<String, dynamic>? metadataJson,
+    String? idempotencyKey,
+  }) async {
+    return ApiService.postDecisionEvent(
+      eventType: eventType,
+      purchaseId: purchaseId,
+      verdict: verdict,
+      dominantFactor: dominantFactor,
+      riskLevel: riskLevel,
+      category: category,
+      amountBand: amountBand,
+      recommendedAction: recommendedAction,
+      userAction: userAction,
+      overrodeRecommendation: overrodeRecommendation,
+      feedbackHelpful: feedbackHelpful,
+      metadataJson: metadataJson,
+      idempotencyKey: idempotencyKey,
+    );
+  }
+
+  Future<Map<String, dynamic>> getDecisionQuality({
+    int lookbackDays = 30,
+    int minSample = 5,
+  }) async {
+    return ApiService.getDecisionQuality(
+      lookbackDays: lookbackDays,
+      minSample: minSample,
+    );
+  }
 }

@@ -7,7 +7,8 @@ class HomeInsightsCarousel extends ConsumerStatefulWidget {
   const HomeInsightsCarousel({super.key});
 
   @override
-  ConsumerState<HomeInsightsCarousel> createState() => _HomeInsightsCarouselState();
+  ConsumerState<HomeInsightsCarousel> createState() =>
+      _HomeInsightsCarouselState();
 }
 
 class _HomeInsightsCarouselState extends ConsumerState<HomeInsightsCarousel> {
@@ -36,17 +37,21 @@ class _HomeInsightsCarouselState extends ConsumerState<HomeInsightsCarousel> {
       data: (insight) {
         // Collect insights to show
         List<String> messages = [];
-        
+
         // Priority 1: High Regret Target
         if (insight.highRegretRatePercent > 30) {
-          messages.add("You've frequently regretted ${insight.topRegretCategory} purchases lately.");
+          messages.add(
+            "You've frequently regretted ${insight.topRegretCategory} purchases lately.",
+          );
         }
-        
+
         // Priority 2: Impulse Window
         if (insight.fridayOverspendPercent > 0) {
-          messages.add("Watch out during ${insight.impulseWindow}: you tend to spend ${insight.fridayOverspendPercent}% more.");
+          messages.add(
+            "Watch out during ${insight.impulseWindow}: you tend to spend ${insight.fridayOverspendPercent}% more.",
+          );
         }
-        
+
         // Priority 3: General Trend (Fallback)
         if (messages.isEmpty) {
           messages.add("Recent behavior: ${insight.mainBehaviorTrend}");
@@ -54,10 +59,11 @@ class _HomeInsightsCarouselState extends ConsumerState<HomeInsightsCarousel> {
 
         // Cap at 2 insights max for the home screen rotating card
         final displayMessages = messages.take(2).toList();
-        
+
         if (displayMessages.isEmpty) return const SizedBox.shrink();
 
-        final currentMessage = displayMessages[_currentIndex % displayMessages.length];
+        final currentMessage =
+            displayMessages[_currentIndex % displayMessages.length];
 
         return AnimatedSwitcher(
           duration: const Duration(seconds: 1),
@@ -69,13 +75,17 @@ class _HomeInsightsCarouselState extends ConsumerState<HomeInsightsCarousel> {
             margin: const EdgeInsets.only(bottom: 16),
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.orange.withOpacity(0.08),
+              color: Colors.orange.withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.orange.withOpacity(0.2)),
+              border: Border.all(color: Colors.orange.withValues(alpha: 0.2)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.lightbulb_outline, color: Colors.orangeAccent, size: 24),
+                const Icon(
+                  Icons.lightbulb_outline,
+                  color: Colors.orangeAccent,
+                  size: 24,
+                ),
                 const SizedBox(width: 14),
                 Expanded(
                   child: Text(
@@ -94,7 +104,7 @@ class _HomeInsightsCarouselState extends ConsumerState<HomeInsightsCarousel> {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }

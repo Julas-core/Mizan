@@ -4,7 +4,7 @@ from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from app.core.config import settings
 from app.core.rate_limit import limiter
-from app.api.v1 import health, users, onboarding, decisions, purchases
+from app.api.v1 import health, users, onboarding, decisions, purchases, analytics
 
 from contextlib import asynccontextmanager
 from app.core.logging_config import setup_logging
@@ -91,6 +91,11 @@ def get_application() -> FastAPI:
         purchases.router,
         prefix=f"{settings.API_V1_STR}/purchases",
         tags=["Purchases & Reflections"]
+    )
+    application.include_router(
+        analytics.router,
+        prefix=f"{settings.API_V1_STR}/analytics",
+        tags=["Decision Analytics"]
     )
 
     # Auth routes (no prefix — mounted at /api/v1/auth)

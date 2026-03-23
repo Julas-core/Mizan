@@ -29,28 +29,35 @@ class ApiService {
     _currentUserId = _prefs?.getString('current_user_id') ?? '';
     _token = _prefs?.getString('auth_token') ?? '';
     if (kDebugMode) {
-      print('ApiService: Initialized with UserID: "$_currentUserId", Token: "${_token.isNotEmpty ? 'SET' : 'MISSING'}"');
+      print(
+        'ApiService: Initialized with UserID: "$_currentUserId", Token: "${_token.isNotEmpty ? 'SET' : 'MISSING'}"',
+      );
     }
   }
 
-  static Future<void> _persistCurrentUserId(String userId, [String? token]) async {
+  static Future<void> _persistCurrentUserId(
+    String userId, [
+    String? token,
+  ]) async {
     _prefs ??= await SharedPreferences.getInstance();
     await _prefs!.setString('current_user_id', userId);
     _currentUserId = userId;
-    
+
     if (token != null) {
       await _prefs!.setString('auth_token', token);
       _token = token;
     }
-    
+
     if (kDebugMode) {
-      print('ApiService: Persisted UserID: "$userId" ${token != null ? '(with new Token)' : ''}');
+      print(
+        'ApiService: Persisted UserID: "$userId" ${token != null ? '(with new Token)' : ''}',
+      );
     }
   }
 
   static List<String> _candidateBaseUrls() {
     final urls = <String>[];
-    
+
     // 1. Prioritize Remote/Physical Target
     urls.add(physicalDeviceBaseUrl);
 
@@ -61,14 +68,16 @@ class ApiService {
       }
       urls.add(baseUrl);
     }
-    
+
     return urls.toSet().toList(); // Unique items only
   }
 
   static String _requireUserId() {
     if (_currentUserId.isEmpty) {
       if (kDebugMode) {
-        print('ApiService: ERROR - _requireUserId called but _currentUserId is empty!');
+        print(
+          'ApiService: ERROR - _requireUserId called but _currentUserId is empty!',
+        );
       }
       throw const AuthException(
         'No active user found. Complete onboarding first.',
@@ -150,9 +159,9 @@ class ApiService {
     }
 
     if (lastError is SocketException || lastError is TimeoutException) {
-      final msg = kDebugMode 
-        ? 'Network error: $method ${urls.first}. Is the backend up at Render?' 
-        : 'Network connection failed.';
+      final msg = kDebugMode
+          ? 'Network error: $method ${urls.first}. Is the backend up at Render?'
+          : 'Network connection failed.';
       throw NetworkException(msg);
     }
 
@@ -162,7 +171,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getUserSummary() async {
     final userId = _requireUserId();
     final response = await _executeRequest(
-      'GET', 
+      'GET',
       '/users/$userId/summary',
       headers: _jsonHeaders(),
     );
@@ -180,11 +189,11 @@ class ApiService {
     final decoded = jsonDecode(response.body) as Map<String, dynamic>;
     final id = decoded['id'] as String?;
     final token = decoded['access_token'] as String?;
-    
+
     if (id == null || id.isEmpty) {
       throw const UnknownException('Backend did not return a valid user id');
     }
-    
+
     await _persistCurrentUserId(id, token);
     return id;
   }
@@ -252,7 +261,7 @@ class ApiService {
   static Future<List<Map<String, dynamic>>> getGoals() async {
     final userId = _requireUserId();
     final response = await _executeRequest(
-      'GET', 
+      'GET',
       '/onboarding/$userId/goals',
       headers: _jsonHeaders(),
     );
@@ -263,7 +272,7 @@ class ApiService {
   static Future<Map<String, dynamic>> getHabitsInsights() async {
     final userId = _requireUserId();
     final response = await _executeRequest(
-      'GET', 
+      'GET',
       '/users/$userId/insights',
       headers: _jsonHeaders(),
     );
@@ -280,7 +289,7 @@ class ApiService {
     final response = await _executeRequest(
       'POST',
       '/decisions/$userId/evaluate',
-      headers: _jsonHeaders(idempotencyKey: idempotencyKey),
+      headers: _jsonHeaders(idempotencyKey),
       body: jsonEncode({
         'item_name': itemName,
         'price_cents': priceCents,
@@ -310,7 +319,7 @@ class ApiService {
     final response = await _executeRequest(
       'PATCH',
       '/purchases/$purchaseId/status',
-      headers: _jsonHeaders(idempotencyKey: idempotencyKey),
+      headers: _jsonHeaders(idempotencyKey),
       body: jsonEncode({
         'status': status,
         'spent_from_goal_id': spentFromGoalId,
@@ -341,7 +350,7 @@ class ApiService {
     final response = await _executeRequest(
       'POST',
       '/purchases/$purchaseId/reflect',
-      headers: _jsonHeaders(idempotencyKey: idempotencyKey),
+      headers: _jsonHeaders(idempotencyKey),
       body: jsonEncode({
         'purchase_id': purchaseId,
         'window_days': windowDays,
@@ -350,6 +359,57 @@ class ApiService {
         'actual_days_impacted': actualDaysImpacted,
       }),
       timeout: const Duration(seconds: 8),
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> postDecisionEvent({
+    required String eventType,
+    String? purchaseId,
+    String? verdict,
+    String? dominantFactor,
+    String? riskLevel,
+    String? category,
+    String? amountBand,
+    String? recommendedAction,
+    String? userAction,
+    bool? overrodeRecommendation,
+    bool? feedbackHelpful,
+    Map<String, dynamic>? metadataJson,
+    String? idempotencyKey,
+  }) async {
+    final userId = _requireUserId();
+    final response = await _executeRequest(
+      'POST',
+      '/analytics/$userId/decision-events',
+      headers: _jsonHeaders(idempotencyKey),
+      body: jsonEncode({
+        'event_type': eventType,
+        'purchase_id': purchaseId,
+        'verdict': verdict,
+        'dominant_factor': dominantFactor,
+        'risk_level': riskLevel,
+        'category': category,
+        'amount_band': amountBand,
+        'recommended_action': recommendedAction,
+        'user_action': userAction,
+        'overrode_recommendation': overrodeRecommendation,
+        'feedback_helpful': feedbackHelpful,
+        'metadata_json': metadataJson,
+      }),
+    );
+    return jsonDecode(response.body) as Map<String, dynamic>;
+  }
+
+  static Future<Map<String, dynamic>> getDecisionQuality({
+    int lookbackDays = 30,
+    int minSample = 5,
+  }) async {
+    final userId = _requireUserId();
+    final response = await _executeRequest(
+      'GET',
+      '/analytics/$userId/decision-quality?lookback_days=$lookbackDays&min_sample=$minSample',
+      headers: _jsonHeaders(),
     );
     return jsonDecode(response.body) as Map<String, dynamic>;
   }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 import 'package:mobile/core/api/api_service.dart';
 import 'decision_analysis_screen.dart';
@@ -8,6 +7,8 @@ import 'goals_hub_screen.dart';
 import 'purchase_reflection_screen.dart';
 import 'habits_screen.dart';
 import 'widgets/home_insights_carousel.dart';
+import 'package:intl/intl.dart';
+import '../widgets/mizan_gauge.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -165,6 +166,12 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            if (!_isSummaryLoading && _summary != null) ...[
+              _buildHeroSection(),
+              const SizedBox(height: 24),
+              _buildUpcomingBills(),
+              const SizedBox(height: 24),
+            ],
             // Evaluation trigger card mimicking the design
             Container(
               decoration: BoxDecoration(
@@ -481,3 +488,5 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 }
+
+
